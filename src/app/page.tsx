@@ -12,7 +12,7 @@ export default function Home() {
         </h1>
         <p className="mt-4 text-muted leading-relaxed">
           Check in to an event, read the idea primer, ask questions and share
-          your feedback — all from your phone.
+          your feedback.
         </p>
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-6 text-left shadow-sm">
           <h2 className="font-medium">Joining an event?</h2>
