@@ -2,6 +2,7 @@ import { count } from "drizzle-orm";
 import Link from "next/link";
 import { getDb } from "@/db";
 import { attendees, events, questions } from "@/db/schema";
+import { setEventArchived } from "@/lib/actions";
 import { requireAdmin } from "@/lib/session";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -33,6 +34,8 @@ export default async function AdminHome() {
   );
 
   const sorted = [...allEvents].sort((a, b) => b.date.localeCompare(a.date));
+  const active = sorted.filter((e) => !e.archivedAt);
+  const archived = sorted.filter((e) => e.archivedAt);
 
   return (
     <main>
@@ -46,7 +49,7 @@ export default async function AdminHome() {
         </Link>
       </div>
 
-      {sorted.length === 0 ? (
+      {active.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-[#ddd9d0] p-10 text-center text-muted">
           <p className="font-medium text-foreground">No events yet</p>
           <p className="mt-1 text-sm">
@@ -67,7 +70,7 @@ export default async function AdminHome() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((event) => (
+              {active.map((event) => (
                 <tr
                   key={event.id}
                   className="border-b border-[#f2f1ee] last:border-0 hover:bg-[#fafaf8]"
@@ -100,6 +103,42 @@ export default async function AdminHome() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {archived.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-muted">
+            Archived
+          </h2>
+          <ul className="mt-2 flex flex-col gap-2">
+            {archived.map((event) => (
+              <li
+                key={event.id}
+                className="flex items-center justify-between gap-3 rounded-3xl border border-line bg-white/60 px-4 py-3"
+              >
+                <span>
+                  <Link
+                    href={`/admin/events/${event.id}`}
+                    className="font-medium text-muted hover:text-foreground"
+                  >
+                    {event.title}
+                  </Link>
+                  <span className="ml-2 text-sm text-faint">{event.date}</span>
+                </span>
+                <form action={setEventArchived}>
+                  <input type="hidden" name="id" value={event.id} />
+                  <input type="hidden" name="archived" value="0" />
+                  <button
+                    type="submit"
+                    className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-muted hover:bg-[#fafaf8]"
+                  >
+                    Unarchive
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </main>
   );

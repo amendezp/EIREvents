@@ -142,5 +142,45 @@ const csv = await resp.text();
 if (!csv.includes("test.candidate@example.com")) fail("CSV export missing attendee");
 console.log("csv export OK");
 
+// Presentation view
+await admin.goto(`${BASE}/admin/events/${eventId}/present`);
+await admin.waitForSelector("text=Scan to check in");
+if (!(await admin.textContent("body")).includes("DEMO42")) fail("present view missing event code");
+console.log("presentation view OK");
+
+// AI summary: without an API key the button must degrade gracefully
+await admin.goto(`${BASE}/admin/events/${eventId}`);
+await admin.waitForSelector("text=AI debrief");
+if (!process.env.ANTHROPIC_API_KEY) {
+  await admin.click('button:has-text("Generate summary")');
+  await admin.waitForSelector("text=not configured", { timeout: 15000 });
+  console.log("summary not-configured degradation OK");
+}
+
+// Archive / delete lifecycle on a scratch event
+await admin.goto(`${BASE}/admin/events/new`);
+await admin.fill('input[name="title"]', "Scratch Lifecycle Event");
+await admin.click('button:has-text("Create event")');
+await admin.waitForSelector('h1:has-text("Scratch Lifecycle Event")', { timeout: 15000 });
+await admin.click('button:has-text("Archive event")');
+await admin.waitForSelector('button:has-text("Unarchive event")', { timeout: 15000 });
+console.log("archive OK");
+await admin.goto(`${BASE}/admin`);
+await admin.waitForSelector("h2:has-text('Archived')");
+await admin.click("text=Scratch Lifecycle Event");
+await admin.waitForSelector('button:has-text("Delete event permanently")');
+admin.once("dialog", (d) => d.accept());
+await admin.click('button:has-text("Delete event permanently")');
+await admin.waitForURL(`${BASE}/admin`, { timeout: 15000 });
+// innerText, not textContent: stale RSC hydration <script> payloads from
+// the initial page load legitimately still mention the title.
+await admin
+  .waitForFunction(
+    () => !document.body.innerText.includes("Scratch Lifecycle Event"),
+    { timeout: 10000 },
+  )
+  .catch(() => fail("event delete failed — still visible on /admin"));
+console.log("delete event OK");
+
 await browser.close();
 console.log("ALL E2E CHECKS PASSED");

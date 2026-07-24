@@ -28,7 +28,7 @@ export default async function EventPage({
     .from(events)
     .where(eq(events.code, code))
     .limit(1);
-  if (!event || event.status === "draft") notFound();
+  if (!event || event.status === "draft" || event.archivedAt) notFound();
 
   const attendeeId = await getAttendeeId(event.id);
   const attendee = attendeeId

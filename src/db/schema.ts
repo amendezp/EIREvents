@@ -16,6 +16,9 @@ export const events = pgTable("events", {
   primer: text("primer").notNull().default(""),
   nda: text("nda").notNull().default(""),
   status: text("status").notNull().default("live"),
+  archivedAt: bigint("archived_at", { mode: "number" }),
+  aiSummary: text("ai_summary"),
+  aiSummaryAt: bigint("ai_summary_at", { mode: "number" }),
   createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 

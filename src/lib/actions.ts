@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db";
@@ -116,6 +116,42 @@ export async function setEventStatus(formData: FormData): Promise<void> {
   revalidatePath(`/admin/events/${id}`);
 }
 
+export async function setEventArchived(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = str(formData, "id");
+  const archived = str(formData, "archived") === "1";
+  const db = await getDb();
+  await db
+    .update(events)
+    .set({ archivedAt: archived ? Date.now() : null })
+    .where(eq(events.id, id));
+  revalidatePath(`/admin/events/${id}`);
+  revalidatePath("/admin");
+}
+
+export async function deleteEvent(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = str(formData, "id");
+  const db = await getDb();
+  const questionIds = (
+    await db
+      .select({ id: questions.id })
+      .from(questions)
+      .where(eq(questions.eventId, id))
+  ).map((q) => q.id);
+  if (questionIds.length > 0) {
+    await db
+      .delete(questionVotes)
+      .where(inArray(questionVotes.questionId, questionIds));
+  }
+  await db.delete(questions).where(eq(questions.eventId, id));
+  await db.delete(feedback).where(eq(feedback.eventId, id));
+  await db.delete(attendees).where(eq(attendees.eventId, id));
+  await db.delete(events).where(eq(events.id, id));
+  revalidatePath("/admin");
+  redirect("/admin");
+}
+
 export async function deleteQuestion(formData: FormData): Promise<void> {
   await requireAdmin();
   const questionId = str(formData, "questionId");
@@ -149,7 +185,7 @@ async function liveEventByCode(code: string) {
     .from(events)
     .where(eq(events.code, code))
     .limit(1);
-  if (!event || event.status !== "live") return null;
+  if (!event || event.status !== "live" || event.archivedAt) return null;
   return event;
 }
 

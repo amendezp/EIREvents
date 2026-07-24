@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
 import JoinByCode from "@/components/JoinByCode";
 import { getDb } from "@/db";
@@ -15,7 +15,13 @@ export default async function Home() {
   const liveEvents = await db
     .select()
     .from(events)
-    .where(and(eq(events.status, "live"), eq(events.date, todayInEventTz())));
+    .where(
+      and(
+        eq(events.status, "live"),
+        eq(events.date, todayInEventTz()),
+        isNull(events.archivedAt),
+      ),
+    );
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">

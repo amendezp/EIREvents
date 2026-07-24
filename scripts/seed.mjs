@@ -10,9 +10,13 @@ CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE, title TEXT NOT NULL,
   date TEXT NOT NULL, location TEXT, primer TEXT NOT NULL DEFAULT '',
   nda TEXT NOT NULL DEFAULT '',
-  status TEXT NOT NULL DEFAULT 'live', created_at BIGINT NOT NULL
+  status TEXT NOT NULL DEFAULT 'live', archived_at BIGINT,
+  ai_summary TEXT, ai_summary_at BIGINT, created_at BIGINT NOT NULL
 );
 ALTER TABLE events ADD COLUMN IF NOT EXISTS nda TEXT NOT NULL DEFAULT '';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS archived_at BIGINT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS ai_summary TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS ai_summary_at BIGINT;
 CREATE TABLE IF NOT EXISTS attendees (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
   role TEXT, company TEXT, linkedin TEXT, nda_accepted_at BIGINT, checked_in_at BIGINT NOT NULL

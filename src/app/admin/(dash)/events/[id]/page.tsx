@@ -4,8 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import AutoRefresh from "@/components/AutoRefresh";
+import ConfirmButton from "@/components/ConfirmButton";
 import CopyButton from "@/components/CopyButton";
 import LocalTime from "@/components/LocalTime";
+import SummaryPanel from "@/components/SummaryPanel";
 import { getDb } from "@/db";
 import {
   attendees,
@@ -14,7 +16,13 @@ import {
   questions,
   questionVotes,
 } from "@/db/schema";
-import { deleteQuestion, markAnswered, setEventStatus } from "@/lib/actions";
+import {
+  deleteEvent,
+  deleteQuestion,
+  markAnswered,
+  setEventArchived,
+  setEventStatus,
+} from "@/lib/actions";
 import { requireAdmin } from "@/lib/session";
 
 const WOULD_JOIN_COLORS: Record<string, string> = {
@@ -139,6 +147,19 @@ export default async function EventDashboard({
             >
               Edit
             </Link>
+            <a
+              href={`/admin/events/${id}/present`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted underline underline-offset-4 hover:text-foreground"
+            >
+              Present ↗
+            </a>
+            {event.archivedAt && (
+              <span className="rounded-full bg-[#efeeea] px-2 py-0.5 text-xs font-medium text-muted">
+                Archived
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-muted">
             {event.date}
@@ -320,6 +341,12 @@ export default async function EventDashboard({
           )}
         </div>
       </section>
+
+      <SummaryPanel
+        eventId={id}
+        summary={event.aiSummary}
+        generatedAt={event.aiSummaryAt}
+      />
 
       {/* Questions */}
       <section className="mt-8">
@@ -530,6 +557,43 @@ export default async function EventDashboard({
               })}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Danger zone */}
+      <section className="mt-10 rounded-3xl border border-line bg-white p-5 shadow-soft">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-muted">
+          Event management
+        </h2>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <form action={setEventArchived}>
+            <input type="hidden" name="id" value={id} />
+            <input
+              type="hidden"
+              name="archived"
+              value={event.archivedAt ? "0" : "1"}
+            />
+            <button
+              type="submit"
+              className="rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-muted hover:text-foreground"
+            >
+              {event.archivedAt ? "Unarchive event" : "Archive event"}
+            </button>
+          </form>
+          <form action={deleteEvent}>
+            <input type="hidden" name="id" value={id} />
+            <ConfirmButton
+              message={`Permanently delete "${event.title}" with all its attendees, questions and feedback? This cannot be undone.`}
+              className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+            >
+              Delete event permanently
+            </ConfirmButton>
+          </form>
+          <p className="text-xs text-muted">
+            Archiving hides the event everywhere (attendees see a not-found
+            page) but keeps all data. Deleting removes everything, including
+            NDA acceptance records — export your CSVs first.
+          </p>
         </div>
       </section>
     </main>
