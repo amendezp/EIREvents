@@ -157,11 +157,28 @@ if (!process.env.ANTHROPIC_API_KEY) {
   console.log("summary not-configured degradation OK");
 }
 
-// Archive / delete lifecycle on a scratch event
+// Scratch event (live, no custom NDA) for default-NDA + archive/delete tests
 await admin.goto(`${BASE}/admin/events/new`);
 await admin.fill('input[name="title"]', "Scratch Lifecycle Event");
+await admin.selectOption('select[name="status"]', "live");
 await admin.click('button:has-text("Create event")');
 await admin.waitForSelector('h1:has-text("Scratch Lifecycle Event")', { timeout: 15000 });
+
+// Default NDA: an event with no custom NDA text must still gate on the
+// standard agreement
+const scratchCode = (await admin.textContent("body")).match(
+  /Event code: ([A-Z2-9]{6})/,
+)?.[1];
+if (!scratchCode) fail("could not read scratch event code");
+const p2 = await mobile.newPage();
+await p2.goto(`${BASE}/e/${scratchCode}`);
+await p2.fill('input[name="name"]', "Default NDA Tester");
+await p2.fill('input[name="email"]', "defnda@example.com");
+await p2.click('button[type="submit"]');
+await p2.waitForSelector("text=Non-Disclosure Agreement", { timeout: 15000 });
+console.log("default NDA fallback OK");
+await p2.close();
+
 await admin.click('button:has-text("Archive event")');
 await admin.waitForSelector('button:has-text("Unarchive event")', { timeout: 15000 });
 console.log("archive OK");

@@ -11,8 +11,10 @@ with live attendance, engagement metrics, and CSV exports for follow-up.
 Attendees scan it, land on `/e/<CODE>`, and:
 
 1. **Check in** — name, email, role, company, LinkedIn (30 seconds, no account)
-2. **NDA** (if the event has one) — read and accept before anything else is
-   shown; acceptance is recorded with a timestamp
+2. **NDA** — every event shows one: the built-in standard confidentiality
+   agreement by default, or custom text if the organizer provides it.
+   Attendees must accept before anything else is shown; acceptance is
+   recorded with a timestamp
 3. **The Idea** — read the primer for the idea being presented (Markdown)
 4. **Q&A** — ask questions and upvote others' questions; answered questions get
    marked live, and unanswered ones are captured for follow-up

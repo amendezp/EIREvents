@@ -117,7 +117,6 @@ export default async function EventDashboard({
   const wouldJoinTotal =
     wouldJoinCounts.yes + wouldJoinCounts.maybe + wouldJoinCounts.no;
 
-  const ndaRequired = event.nda.trim().length > 0;
   const ndaSigned = attendeeRows.filter((a) => a.ndaAcceptedAt).length;
 
   const feedbackByAttendee = new Map(
@@ -235,7 +234,7 @@ export default async function EventDashboard({
         <StatTile
           label="Checked in"
           value={String(attendeeRows.length)}
-          detail={ndaRequired ? `${ndaSigned} signed the NDA` : undefined}
+          detail={`${ndaSigned} signed the NDA`}
         />
         <StatTile
           label="Questions"
@@ -487,9 +486,7 @@ export default async function EventDashboard({
                 <th className="px-4 py-3 font-medium">Company</th>
                 <th className="px-4 py-3 font-medium">LinkedIn</th>
                 <th className="px-4 py-3 font-medium">Checked in</th>
-                {ndaRequired && (
-                  <th className="px-4 py-3 font-medium">NDA</th>
-                )}
+                <th className="px-4 py-3 font-medium">NDA</th>
                 <th className="px-4 py-3 text-right font-medium">Excitement</th>
                 <th className="px-4 py-3 font-medium">Would join</th>
               </tr>
@@ -498,7 +495,7 @@ export default async function EventDashboard({
               {attendeeRows.length === 0 && (
                 <tr>
                   <td
-                    colSpan={ndaRequired ? 9 : 8}
+                    colSpan={9}
                     className="px-4 py-8 text-center text-muted"
                   >
                     No one has checked in yet — share the QR code above.
@@ -533,17 +530,15 @@ export default async function EventDashboard({
                     <td className="px-4 py-3 tabular-nums text-muted">
                       <LocalTime ms={a.checkedInAt} />
                     </td>
-                    {ndaRequired && (
-                      <td className="px-4 py-3 text-muted">
-                        {a.ndaAcceptedAt ? (
-                          <span className="font-medium text-emerald-700">
-                            ✓ <LocalTime ms={a.ndaAcceptedAt} />
-                          </span>
-                        ) : (
-                          "not signed"
-                        )}
-                      </td>
-                    )}
+                    <td className="px-4 py-3 text-muted">
+                      {a.ndaAcceptedAt ? (
+                        <span className="font-medium text-emerald-700">
+                          ✓ <LocalTime ms={a.ndaAcceptedAt} />
+                        </span>
+                      ) : (
+                        "not signed"
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right tabular-nums">
                       {f?.interest != null ? `${f.interest}/5` : "—"}
                     </td>

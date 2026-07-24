@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useState } from "react";
 import PrimerGenerator from "@/components/PrimerGenerator";
+import { DEFAULT_NDA } from "@/lib/nda";
 import {
   createEvent,
   updateEvent,
@@ -9,19 +10,6 @@ import {
 } from "@/lib/actions";
 
 const initialState: ActionState = {};
-
-const NDA_TEMPLATE = `# Non-Disclosure Agreement
-
-By continuing, you ("Recipient") agree to the following with AI Fund ("Discloser"):
-
-1. **Confidential Information.** Any non-public information shared at this event — including the business idea, market analyses, strategies, and the contents of the discussion — is Confidential Information.
-2. **Use.** Recipient will use Confidential Information solely to participate in this event and evaluate a potential role, and for no other purpose.
-3. **Non-disclosure.** Recipient will not disclose Confidential Information to any third party and will protect it with at least reasonable care.
-4. **Exclusions.** Information that is or becomes public through no fault of Recipient, was already lawfully known to Recipient, or is independently developed is not Confidential Information.
-5. **Term.** These obligations last for two (2) years from today.
-6. **No license.** No rights or licenses are granted by this disclosure.
-
-Selecting "Agree and continue" constitutes your electronic signature.`;
 
 export default function EventForm({
   event,
@@ -126,15 +114,15 @@ export default function EventForm({
       <label className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">
-            NDA <span className="font-normal text-muted">(optional, Markdown)</span>
+            NDA <span className="font-normal text-muted">(Markdown)</span>
           </span>
           {!nda && (
             <button
               type="button"
-              onClick={() => setNda(NDA_TEMPLATE)}
+              onClick={() => setNda(DEFAULT_NDA)}
               className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-muted hover:bg-[#fafaf8]"
             >
-              Insert standard template
+              Edit the standard agreement
             </button>
           )}
         </div>
@@ -143,7 +131,7 @@ export default function EventForm({
           rows={nda ? 10 : 3}
           value={nda}
           onChange={(e) => setNda(e.target.value)}
-          placeholder="Leave empty for no NDA. If filled, attendees must read and accept it after checking in, before they can see the primer."
+          placeholder="Every attendee must accept an NDA after checking in. Leave this empty to use the standard AI Fund event confidentiality agreement, or write your own text here to replace it."
           className="rounded-lg border border-line bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
         />
         <span className="text-xs text-muted">

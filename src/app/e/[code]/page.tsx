@@ -8,6 +8,7 @@ import {
   questions,
   questionVotes,
 } from "@/db/schema";
+import { DEFAULT_NDA } from "@/lib/nda";
 import { getAttendeeId } from "@/lib/session";
 import AutoRefresh from "@/components/AutoRefresh";
 import CheckInForm from "./CheckInForm";
@@ -56,7 +57,8 @@ export default async function EventPage({
   }
 
   // NDA gate: nothing beyond check-in is visible until it's accepted.
-  if (event.nda.trim() && !attendee.ndaAcceptedAt) {
+  // Events without custom NDA text fall back to the standard agreement.
+  if (!attendee.ndaAcceptedAt) {
     if (event.status !== "live") {
       return (
         <CheckInForm
@@ -72,7 +74,7 @@ export default async function EventPage({
       <NdaGate
         code={code}
         title={event.title}
-        nda={event.nda}
+        nda={event.nda.trim() || DEFAULT_NDA}
         attendeeName={attendee.name}
       />
     );
