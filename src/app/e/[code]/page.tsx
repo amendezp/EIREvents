@@ -1,6 +1,6 @@
 import { and, count, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   attendees,
   events,
@@ -21,18 +21,25 @@ export default async function EventPage({
   const { code: rawCode } = await params;
   const code = rawCode.toUpperCase();
 
-  const event = db.select().from(events).where(eq(events.code, code)).get();
+  const db = await getDb();
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.code, code))
+    .limit(1);
   if (!event || event.status === "draft") notFound();
 
   const attendeeId = await getAttendeeId(event.id);
   const attendee = attendeeId
-    ? db
-        .select()
-        .from(attendees)
-        .where(
-          and(eq(attendees.id, attendeeId), eq(attendees.eventId, event.id)),
-        )
-        .get()
+    ? (
+        await db
+          .select()
+          .from(attendees)
+          .where(
+            and(eq(attendees.id, attendeeId), eq(attendees.eventId, event.id)),
+          )
+          .limit(1)
+      )[0]
     : undefined;
 
   if (!attendee) {
@@ -47,7 +54,7 @@ export default async function EventPage({
     );
   }
 
-  const questionRows = db
+  const questionRows = await db
     .select({
       id: questions.id,
       body: questions.body,
@@ -61,28 +68,24 @@ export default async function EventPage({
     .leftJoin(attendees, eq(questions.attendeeId, attendees.id))
     .leftJoin(questionVotes, eq(questionVotes.questionId, questions.id))
     .where(eq(questions.eventId, event.id))
-    .groupBy(questions.id)
-    .all();
+    .groupBy(questions.id, attendees.id);
 
   const myVotes = new Set(
-    db
-      .select({ questionId: questionVotes.questionId })
-      .from(questionVotes)
-      .where(eq(questionVotes.attendeeId, attendee.id))
-      .all()
-      .map((v) => v.questionId),
+    (
+      await db
+        .select({ questionId: questionVotes.questionId })
+        .from(questionVotes)
+        .where(eq(questionVotes.attendeeId, attendee.id))
+    ).map((v) => v.questionId),
   );
 
-  const myFeedback = db
+  const [myFeedback] = await db
     .select()
     .from(feedback)
     .where(
-      and(
-        eq(feedback.eventId, event.id),
-        eq(feedback.attendeeId, attendee.id),
-      ),
+      and(eq(feedback.eventId, event.id), eq(feedback.attendeeId, attendee.id)),
     )
-    .get();
+    .limit(1);
 
   const sorted = [...questionRows].sort(
     (a, b) => b.votes - a.votes || a.createdAt - b.createdAt,

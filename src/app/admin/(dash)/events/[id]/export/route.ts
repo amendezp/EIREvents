@@ -1,5 +1,5 @@
 import { count, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   attendees,
   events,
@@ -30,7 +30,12 @@ export async function GET(
   }
 
   const { id } = await params;
-  const event = db.select().from(events).where(eq(events.id, id)).get();
+  const db = await getDb();
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, id))
+    .limit(1);
   if (!event) return new Response("Not found", { status: 404 });
 
   const type = new URL(request.url).searchParams.get("type") ?? "attendees";
@@ -39,22 +44,22 @@ export async function GET(
   let filename: string;
 
   if (type === "questions") {
-    const rows = db
-      .select({
-        body: questions.body,
-        answered: questions.answered,
-        createdAt: questions.createdAt,
-        askerName: attendees.name,
-        askerEmail: attendees.email,
-        votes: count(questionVotes.attendeeId),
-      })
-      .from(questions)
-      .leftJoin(attendees, eq(questions.attendeeId, attendees.id))
-      .leftJoin(questionVotes, eq(questionVotes.questionId, questions.id))
-      .where(eq(questions.eventId, id))
-      .groupBy(questions.id)
-      .all()
-      .sort((a, b) => b.votes - a.votes);
+    const rows = (
+      await db
+        .select({
+          body: questions.body,
+          answered: questions.answered,
+          createdAt: questions.createdAt,
+          askerName: attendees.name,
+          askerEmail: attendees.email,
+          votes: count(questionVotes.attendeeId),
+        })
+        .from(questions)
+        .leftJoin(attendees, eq(questions.attendeeId, attendees.id))
+        .leftJoin(questionVotes, eq(questionVotes.questionId, questions.id))
+        .where(eq(questions.eventId, id))
+        .groupBy(questions.id, attendees.id)
+    ).sort((a, b) => b.votes - a.votes);
 
     csv = toCsv(
       ["question", "asked_by", "email", "upvotes", "answered", "asked_at"],
@@ -69,16 +74,14 @@ export async function GET(
     );
     filename = `eir-${event.code}-questions.csv`;
   } else {
-    const attendeeRows = db
+    const attendeeRows = await db
       .select()
       .from(attendees)
-      .where(eq(attendees.eventId, id))
-      .all();
-    const feedbackRows = db
+      .where(eq(attendees.eventId, id));
+    const feedbackRows = await db
       .select()
       .from(feedback)
-      .where(eq(feedback.eventId, id))
-      .all();
+      .where(eq(feedback.eventId, id));
     const feedbackByAttendee = new Map(
       feedbackRows.map((f) => [f.attendeeId, f]),
     );

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import EventForm from "@/components/EventForm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { events } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 
@@ -12,7 +12,12 @@ export default async function EditEventPage({
 }) {
   await requireAdmin();
   const { id } = await params;
-  const event = db.select().from(events).where(eq(events.id, id)).get();
+  const db = await getDb();
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, id))
+    .limit(1);
   if (!event) notFound();
 
   return (

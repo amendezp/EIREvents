@@ -1,12 +1,13 @@
 import {
+  bigint,
   integer,
+  pgTable,
   primaryKey,
-  sqliteTable,
   text,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/pg-core";
 
-export const events = sqliteTable("events", {
+export const events = pgTable("events", {
   id: text("id").primaryKey(),
   code: text("code").notNull().unique(),
   title: text("title").notNull(),
@@ -14,10 +15,10 @@ export const events = sqliteTable("events", {
   location: text("location"),
   primer: text("primer").notNull().default(""),
   status: text("status").notNull().default("live"),
-  createdAt: integer("created_at").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const attendees = sqliteTable(
+export const attendees = pgTable(
   "attendees",
   {
     id: text("id").primaryKey(),
@@ -26,21 +27,21 @@ export const attendees = sqliteTable(
     email: text("email").notNull(),
     role: text("role"),
     linkedin: text("linkedin"),
-    checkedInAt: integer("checked_in_at").notNull(),
+    checkedInAt: bigint("checked_in_at", { mode: "number" }).notNull(),
   },
   (t) => [uniqueIndex("attendee_event_email").on(t.eventId, t.email)],
 );
 
-export const questions = sqliteTable("questions", {
+export const questions = pgTable("questions", {
   id: text("id").primaryKey(),
   eventId: text("event_id").notNull(),
   attendeeId: text("attendee_id").notNull(),
   body: text("body").notNull(),
   answered: integer("answered").notNull().default(0),
-  createdAt: integer("created_at").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const questionVotes = sqliteTable(
+export const questionVotes = pgTable(
   "question_votes",
   {
     questionId: text("question_id").notNull(),
@@ -49,7 +50,7 @@ export const questionVotes = sqliteTable(
   (t) => [primaryKey({ columns: [t.questionId, t.attendeeId] })],
 );
 
-export const feedback = sqliteTable(
+export const feedback = pgTable(
   "feedback",
   {
     id: text("id").primaryKey(),
@@ -58,7 +59,7 @@ export const feedback = sqliteTable(
     interest: integer("interest"),
     wouldJoin: text("would_join"),
     body: text("body"),
-    updatedAt: integer("updated_at").notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
   },
   (t) => [uniqueIndex("feedback_event_attendee").on(t.eventId, t.attendeeId)],
 );

@@ -1,6 +1,6 @@
 import { count } from "drizzle-orm";
 import Link from "next/link";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { attendees, events, questions } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 
@@ -13,22 +13,23 @@ const STATUS_STYLES: Record<string, string> = {
 export default async function AdminHome() {
   await requireAdmin();
 
-  const allEvents = db.select().from(events).all();
+  const db = await getDb();
+  const allEvents = await db.select().from(events);
   const attendeeCounts = new Map(
-    db
-      .select({ eventId: attendees.eventId, n: count() })
-      .from(attendees)
-      .groupBy(attendees.eventId)
-      .all()
-      .map((r) => [r.eventId, r.n]),
+    (
+      await db
+        .select({ eventId: attendees.eventId, n: count() })
+        .from(attendees)
+        .groupBy(attendees.eventId)
+    ).map((r) => [r.eventId, r.n]),
   );
   const questionCounts = new Map(
-    db
-      .select({ eventId: questions.eventId, n: count() })
-      .from(questions)
-      .groupBy(questions.eventId)
-      .all()
-      .map((r) => [r.eventId, r.n]),
+    (
+      await db
+        .select({ eventId: questions.eventId, n: count() })
+        .from(questions)
+        .groupBy(questions.eventId)
+    ).map((r) => [r.eventId, r.n]),
   );
 
   const sorted = [...allEvents].sort((a, b) => b.date.localeCompare(a.date));

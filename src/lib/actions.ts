@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   attendees,
   events,
@@ -67,10 +67,11 @@ export async function createEvent(
   if (!fields.title || !fields.date) {
     return { error: "Title and date are required." };
   }
+  const db = await getDb();
   const id = newId();
-  db.insert(events)
-    .values({ id, code: shortCode(), createdAt: Date.now(), ...fields })
-    .run();
+  await db
+    .insert(events)
+    .values({ id, code: shortCode(), createdAt: Date.now(), ...fields });
   redirect(`/admin/events/${id}`);
 }
 
@@ -84,7 +85,8 @@ export async function updateEvent(
   if (!fields.title || !fields.date) {
     return { error: "Title and date are required." };
   }
-  db.update(events).set(fields).where(eq(events.id, id)).run();
+  const db = await getDb();
+  await db.update(events).set(fields).where(eq(events.id, id));
   redirect(`/admin/events/${id}`);
 }
 
@@ -93,7 +95,8 @@ export async function setEventStatus(formData: FormData): Promise<void> {
   const id = str(formData, "id");
   const status = str(formData, "status");
   if (!["draft", "live", "closed"].includes(status)) return;
-  db.update(events).set({ status }).where(eq(events.id, id)).run();
+  const db = await getDb();
+  await db.update(events).set({ status }).where(eq(events.id, id));
   revalidatePath(`/admin/events/${id}`);
 }
 
@@ -102,21 +105,20 @@ export async function markAnswered(formData: FormData): Promise<void> {
   const questionId = str(formData, "questionId");
   const eventId = str(formData, "eventId");
   const answered = str(formData, "answered") === "1" ? 1 : 0;
-  db.update(questions)
-    .set({ answered })
-    .where(eq(questions.id, questionId))
-    .run();
+  const db = await getDb();
+  await db.update(questions).set({ answered }).where(eq(questions.id, questionId));
   revalidatePath(`/admin/events/${eventId}`);
 }
 
 // ---------- Candidate flow ----------
 
 async function liveEventByCode(code: string) {
-  const event = db
+  const db = await getDb();
+  const [event] = await db
     .select()
     .from(events)
     .where(eq(events.code, code))
-    .get();
+    .limit(1);
   if (!event || event.status !== "live") return null;
   return event;
 }
@@ -137,32 +139,35 @@ export async function checkIn(
   const role = str(formData, "role") || null;
   const linkedin = str(formData, "linkedin") || null;
 
-  const existing = db
+  const db = await getDb();
+  const [existing] = await db
     .select()
     .from(attendees)
     .where(and(eq(attendees.eventId, event.id), eq(attendees.email, email)))
-    .get();
+    .limit(1);
 
   let attendeeId: string;
   if (existing) {
     attendeeId = existing.id;
-    db.update(attendees)
-      .set({ name, role: role ?? existing.role, linkedin: linkedin ?? existing.linkedin })
-      .where(eq(attendees.id, attendeeId))
-      .run();
+    await db
+      .update(attendees)
+      .set({
+        name,
+        role: role ?? existing.role,
+        linkedin: linkedin ?? existing.linkedin,
+      })
+      .where(eq(attendees.id, attendeeId));
   } else {
     attendeeId = newId();
-    db.insert(attendees)
-      .values({
-        id: attendeeId,
-        eventId: event.id,
-        name,
-        email,
-        role,
-        linkedin,
-        checkedInAt: Date.now(),
-      })
-      .run();
+    await db.insert(attendees).values({
+      id: attendeeId,
+      eventId: event.id,
+      name,
+      email,
+      role,
+      linkedin,
+      checkedInAt: Date.now(),
+    });
   }
 
   await setAttendeeCookie(event.id, attendeeId);
@@ -175,11 +180,12 @@ async function requireAttendee(code: string) {
   if (!event) return null;
   const attendeeId = await getAttendeeId(event.id);
   if (!attendeeId) return null;
-  const attendee = db
+  const db = await getDb();
+  const [attendee] = await db
     .select()
     .from(attendees)
     .where(and(eq(attendees.id, attendeeId), eq(attendees.eventId, event.id)))
-    .get();
+    .limit(1);
   if (!attendee) return null;
   return { event, attendee };
 }
@@ -195,16 +201,15 @@ export async function askQuestion(
   const body = str(formData, "body").slice(0, 1000);
   if (!body) return { error: "Question cannot be empty." };
 
-  db.insert(questions)
-    .values({
-      id: newId(),
-      eventId: ctx.event.id,
-      attendeeId: ctx.attendee.id,
-      body,
-      answered: 0,
-      createdAt: Date.now(),
-    })
-    .run();
+  const db = await getDb();
+  await db.insert(questions).values({
+    id: newId(),
+    eventId: ctx.event.id,
+    attendeeId: ctx.attendee.id,
+    body,
+    answered: 0,
+    createdAt: Date.now(),
+  });
   revalidatePath(`/e/${code}`);
   return { ok: true };
 }
@@ -215,29 +220,30 @@ export async function toggleVote(formData: FormData): Promise<void> {
   const ctx = await requireAttendee(code);
   if (!ctx) return;
 
-  const question = db
+  const db = await getDb();
+  const [question] = await db
     .select()
     .from(questions)
     .where(
       and(eq(questions.id, questionId), eq(questions.eventId, ctx.event.id)),
     )
-    .get();
+    .limit(1);
   if (!question) return;
 
-  const result = db
+  const inserted = await db
     .insert(questionVotes)
     .values({ questionId, attendeeId: ctx.attendee.id })
     .onConflictDoNothing()
-    .run();
-  if (result.changes === 0) {
-    db.delete(questionVotes)
+    .returning({ questionId: questionVotes.questionId });
+  if (inserted.length === 0) {
+    await db
+      .delete(questionVotes)
       .where(
         and(
           eq(questionVotes.questionId, questionId),
           eq(questionVotes.attendeeId, ctx.attendee.id),
         ),
-      )
-      .run();
+      );
   }
   revalidatePath(`/e/${code}`);
 }
@@ -251,8 +257,7 @@ export async function submitFeedback(
   if (!ctx) return { error: "Please check in first." };
 
   const interestRaw = Number(str(formData, "interest"));
-  const interest =
-    interestRaw >= 1 && interestRaw <= 5 ? interestRaw : null;
+  const interest = interestRaw >= 1 && interestRaw <= 5 ? interestRaw : null;
   const wouldJoinRaw = str(formData, "wouldJoin");
   const wouldJoin = ["yes", "maybe", "no"].includes(wouldJoinRaw)
     ? wouldJoinRaw
@@ -263,7 +268,9 @@ export async function submitFeedback(
     return { error: "Add a rating or some thoughts before saving." };
   }
 
-  db.insert(feedback)
+  const db = await getDb();
+  await db
+    .insert(feedback)
     .values({
       id: newId(),
       eventId: ctx.event.id,
@@ -276,8 +283,7 @@ export async function submitFeedback(
     .onConflictDoUpdate({
       target: [feedback.eventId, feedback.attendeeId],
       set: { interest, wouldJoin, body, updatedAt: Date.now() },
-    })
-    .run();
+    });
   revalidatePath(`/e/${code}`);
   return { ok: true };
 }

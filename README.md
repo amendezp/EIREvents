@@ -33,7 +33,7 @@ Attendees scan it, land on `/e/<CODE>`, and:
 |---|---|---|
 | App | Next.js 16 (App Router, TypeScript) | one deployable serves the mobile web app + admin; server actions handle all writes without separate API plumbing |
 | UI | Tailwind CSS v4 | fast to iterate, mobile-first |
-| Data | SQLite via better-sqlite3 + Drizzle ORM | zero-setup for event-scale data (tens of attendees); swap the Drizzle driver for Postgres when needed |
+| Data | Postgres + Drizzle ORM | `DATABASE_URL` in production (Neon on Vercel, or any Postgres); zero-setup embedded Postgres (PGlite) for local dev — same dialect everywhere |
 | Auth | signed HTTP-only cookies | admin: shared password; attendees: per-event signed cookie set at check-in — no accounts to slow people down |
 | Live-ish updates | lightweight polling (`router.refresh()`) | plenty for a room of ~30 people; upgradeable to SSE/websockets later |
 
@@ -52,10 +52,11 @@ npm run dev
 
 Copy `.env.example` to `.env.local`:
 
+- `DATABASE_URL` — Postgres connection string (**required in production**);
+  when unset locally, an embedded Postgres (PGlite) in `./data/pg` is used
 - `ADMIN_PASSWORD` — admin dashboard password (**required in production**)
 - `SESSION_SECRET` — cookie-signing secret (falls back to `ADMIN_PASSWORD`)
-- `DATA_DIR` — where `eirevents.db` lives (default `./data`); point it at a
-  persistent volume in production
+- `DATA_DIR` — where the local PGlite dev database lives (default `./data`)
 
 ## Testing
 
@@ -67,13 +68,25 @@ node scripts/smoke-e2e.mjs
 
 Drives the full flow in a headless browser: check-in → primer → ask/upvote a
 question → submit feedback → admin login → verify the dashboard shows it all →
-mark answered → CSV export.
+mark answered → CSV export. Set `CHROMIUM_PATH` to use a pre-installed
+Chromium instead of Playwright's managed download.
 
-## Deployment notes
+## Deploy to Vercel
 
-SQLite means the app needs a host with a persistent disk (Fly.io, Railway,
-Render, a VM) rather than serverless. Set `ADMIN_PASSWORD` and
-`SESSION_SECRET`, mount a volume, and point `DATA_DIR` at it.
+1. Import the repo at [vercel.com/new](https://vercel.com/new) — Next.js is
+   auto-detected, no build settings needed.
+2. Add a database: in the Vercel project, **Storage → Create Database → Neon**
+   (free tier is fine). This injects `DATABASE_URL` automatically. Any other
+   Postgres provider works too — just set `DATABASE_URL` yourself, using the
+   provider's *pooled* connection string if it offers one.
+3. Set env vars (Project → Settings → Environment Variables):
+   `ADMIN_PASSWORD` (strong value) and `SESSION_SECRET` (long random string).
+4. Deploy. Tables are created automatically on first request; run
+   `DATABASE_URL=<prod-url> npm run seed` locally if you want the demo event
+   in production.
+
+The QR code and join links are derived from the request host, so they work on
+any domain you attach with no extra config.
 
 ## Roadmap ideas
 

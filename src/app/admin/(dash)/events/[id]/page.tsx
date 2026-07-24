@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import AutoRefresh from "@/components/AutoRefresh";
 import CopyButton from "@/components/CopyButton";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   attendees,
   events,
@@ -43,48 +43,50 @@ export default async function EventDashboard({
   await requireAdmin();
   const { id } = await params;
 
-  const event = db.select().from(events).where(eq(events.id, id)).get();
+  const db = await getDb();
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, id))
+    .limit(1);
   if (!event) notFound();
 
-  const attendeeRows = db
-    .select()
-    .from(attendees)
-    .where(eq(attendees.eventId, id))
-    .all()
-    .sort((a, b) => a.checkedInAt - b.checkedInAt);
+  const attendeeRows = (
+    await db.select().from(attendees).where(eq(attendees.eventId, id))
+  ).sort((a, b) => a.checkedInAt - b.checkedInAt);
 
-  const questionRows = db
-    .select({
-      id: questions.id,
-      body: questions.body,
-      answered: questions.answered,
-      createdAt: questions.createdAt,
-      askerName: attendees.name,
-      votes: count(questionVotes.attendeeId),
-    })
-    .from(questions)
-    .leftJoin(attendees, eq(questions.attendeeId, attendees.id))
-    .leftJoin(questionVotes, eq(questionVotes.questionId, questions.id))
-    .where(eq(questions.eventId, id))
-    .groupBy(questions.id)
-    .all()
-    .sort((a, b) => b.votes - a.votes || a.createdAt - b.createdAt);
+  const questionRows = (
+    await db
+      .select({
+        id: questions.id,
+        body: questions.body,
+        answered: questions.answered,
+        createdAt: questions.createdAt,
+        askerName: attendees.name,
+        votes: count(questionVotes.attendeeId),
+      })
+      .from(questions)
+      .leftJoin(attendees, eq(questions.attendeeId, attendees.id))
+      .leftJoin(questionVotes, eq(questionVotes.questionId, questions.id))
+      .where(eq(questions.eventId, id))
+      .groupBy(questions.id, attendees.id)
+  ).sort((a, b) => b.votes - a.votes || a.createdAt - b.createdAt);
 
-  const feedbackRows = db
-    .select({
-      id: feedback.id,
-      interest: feedback.interest,
-      wouldJoin: feedback.wouldJoin,
-      body: feedback.body,
-      updatedAt: feedback.updatedAt,
-      name: attendees.name,
-      email: attendees.email,
-    })
-    .from(feedback)
-    .leftJoin(attendees, eq(feedback.attendeeId, attendees.id))
-    .where(eq(feedback.eventId, id))
-    .all()
-    .sort((a, b) => b.updatedAt - a.updatedAt);
+  const feedbackRows = (
+    await db
+      .select({
+        id: feedback.id,
+        interest: feedback.interest,
+        wouldJoin: feedback.wouldJoin,
+        body: feedback.body,
+        updatedAt: feedback.updatedAt,
+        name: attendees.name,
+        email: attendees.email,
+      })
+      .from(feedback)
+      .leftJoin(attendees, eq(feedback.attendeeId, attendees.id))
+      .where(eq(feedback.eventId, id))
+  ).sort((a, b) => b.updatedAt - a.updatedAt);
 
   const openQuestions = questionRows.filter((q) => q.answered === 0).length;
   const interestValues = feedbackRows

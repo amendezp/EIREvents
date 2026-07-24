@@ -1,8 +1,12 @@
-import Database from "better-sqlite3";
-import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import {
+  drizzle as drizzleNodePg,
+  type NodePgDatabase,
+} from "drizzle-orm/node-postgres";
+import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
+import { Pool } from "pg";
 import * as schema from "./schema";
+
+export type Db = NodePgDatabase<typeof schema>;
 
 // Keep this DDL in sync with schema.ts (and scripts/seed.mjs).
 const DDL = `
@@ -14,7 +18,7 @@ CREATE TABLE IF NOT EXISTS events (
   location TEXT,
   primer TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'live',
-  created_at INTEGER NOT NULL
+  created_at BIGINT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS attendees (
   id TEXT PRIMARY KEY,
@@ -23,7 +27,7 @@ CREATE TABLE IF NOT EXISTS attendees (
   email TEXT NOT NULL,
   role TEXT,
   linkedin TEXT,
-  checked_in_at INTEGER NOT NULL
+  checked_in_at BIGINT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_event_email ON attendees(event_id, email);
 CREATE TABLE IF NOT EXISTS questions (
@@ -32,7 +36,7 @@ CREATE TABLE IF NOT EXISTS questions (
   attendee_id TEXT NOT NULL,
   body TEXT NOT NULL,
   answered INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL
+  created_at BIGINT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS question_votes (
   question_id TEXT NOT NULL,
@@ -46,23 +50,44 @@ CREATE TABLE IF NOT EXISTS feedback (
   interest INTEGER,
   would_join TEXT,
   body TEXT,
-  updated_at INTEGER NOT NULL
+  updated_at BIGINT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS feedback_event_attendee ON feedback(event_id, attendee_id);
 `;
 
-function createDb() {
-  const dataDir = process.env.DATA_DIR ?? path.join(process.cwd(), "data");
+async function createDb(): Promise<Db> {
+  const url = process.env.DATABASE_URL;
+
+  if (url) {
+    const pool = new Pool({ connectionString: url, max: 5 });
+    const db = drizzleNodePg(pool, { schema });
+    await pool.query(DDL);
+    return db;
+  }
+
+  if (process.env.VERCEL) {
+    throw new Error(
+      "DATABASE_URL is not set. Add a Postgres database to the Vercel project " +
+        "(Storage → Create Database → Neon, or any Postgres provider) and expose " +
+        "its connection string as DATABASE_URL.",
+    );
+  }
+
+  // Local development fallback: embedded Postgres (PGlite), persisted to ./data/pg.
+  const { PGlite } = await import("@electric-sql/pglite");
+  const path = await import("node:path");
+  const fs = await import("node:fs");
+  const dataDir = path.join(process.env.DATA_DIR ?? process.cwd(), "data", "pg");
   fs.mkdirSync(dataDir, { recursive: true });
-  const sqlite = new Database(path.join(dataDir, "eirevents.db"));
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.exec(DDL);
-  return drizzle(sqlite, { schema });
+  const client = new PGlite(dataDir);
+  await client.exec(DDL);
+  // PGlite's drizzle instance shares the pg-dialect query API used here.
+  return drizzlePglite(client, { schema }) as unknown as Db;
 }
 
-// Reuse a single connection across dev hot reloads.
-const globalForDb = globalThis as unknown as {
-  __eirDb?: BetterSQLite3Database<typeof schema>;
-};
+// Reuse a single connection (pool) across dev hot reloads and serverless warm starts.
+const globalForDb = globalThis as unknown as { __eirDb?: Promise<Db> };
 
-export const db = (globalForDb.__eirDb ??= createDb());
+export function getDb(): Promise<Db> {
+  return (globalForDb.__eirDb ??= createDb());
+}
