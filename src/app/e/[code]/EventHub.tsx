@@ -30,6 +30,12 @@ type FeedbackData = {
 
 const initialState: ActionState = {};
 
+const TABS = [
+  ["primer", "The Idea"],
+  ["qa", "Q&A"],
+  ["share", "Your Take"],
+] as const;
+
 export default function EventHub({
   code,
   event,
@@ -52,7 +58,7 @@ export default function EventHub({
   const [tab, setTab] = useState<"primer" | "qa" | "share">("primer");
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col sm:max-w-xl">
       <header className="px-5 pt-8 pb-4">
         <p className="text-xs font-medium uppercase tracking-widest text-brand">
           AI Fund · EIR Event
@@ -72,7 +78,27 @@ export default function EventHub({
         )}
       </header>
 
-      <main className="flex-1 px-5 pb-28">
+      {/* One tab bar: fixed at the bottom on phones, inline under the header on larger screens */}
+      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] sm:static sm:border-t-0 sm:border-b sm:bg-transparent sm:pb-0">
+        <div className="mx-auto grid max-w-md grid-cols-3 sm:mx-0 sm:flex sm:max-w-none sm:gap-6 sm:px-5">
+          {TABS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`-mt-px border-t-2 py-3.5 text-sm font-medium transition-colors sm:-mb-px sm:mt-0 sm:border-t-0 sm:border-b-2 sm:py-2.5 ${
+                tab === key
+                  ? "border-brand text-brand"
+                  : "border-transparent text-muted sm:hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <main className="flex-1 px-5 pb-28 sm:pt-6 sm:pb-12">
         {tab === "primer" && <PrimerTab primer={event.primer} />}
         {tab === "qa" && (
           <QATab code={code} questions={questions} closed={event.closed} />
@@ -81,31 +107,6 @@ export default function EventHub({
           <ShareTab code={code} myFeedback={myFeedback} closed={event.closed} />
         )}
       </main>
-
-      <nav className="fixed inset-x-0 bottom-0 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto grid max-w-md grid-cols-3">
-          {(
-            [
-              ["primer", "The Idea"],
-              ["qa", "Q&A"],
-              ["share", "Your Take"],
-            ] as const
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              className={`py-3.5 text-sm font-medium transition-colors ${
-                tab === key
-                  ? "text-brand border-t-2 border-brand -mt-px"
-                  : "text-muted"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </nav>
     </div>
   );
 }
