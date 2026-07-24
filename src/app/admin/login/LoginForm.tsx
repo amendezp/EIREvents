@@ -15,12 +15,12 @@ export default function LoginForm() {
     <main className="flex flex-1 items-center justify-center px-6">
       <form
         action={formAction}
-        className="w-full max-w-xs rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+        className="w-full max-w-xs rounded-3xl border border-line bg-white p-6 shadow-soft"
       >
         <p className="text-xs font-medium uppercase tracking-widest text-brand">
           AI Fund
         </p>
-        <h1 className="mt-1 text-xl font-semibold">EIR Events Admin</h1>
+        <h1 className="mt-1 font-serif text-xl font-semibold">EIR Events Admin</h1>
         <label className="mt-5 flex flex-col gap-1.5">
           <span className="text-sm font-medium">Password</span>
           <input
@@ -28,7 +28,7 @@ export default function LoginForm() {
             name="password"
             required
             autoFocus
-            className="rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:border-brand"
+            className="rounded-lg border border-line px-3 py-2 outline-none focus:border-brand"
           />
         </label>
         {state.error && (

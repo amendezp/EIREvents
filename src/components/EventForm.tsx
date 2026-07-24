@@ -59,7 +59,7 @@ export default function EventForm({
             required
             defaultValue={event?.title ?? ""}
             placeholder="EIR Dinner — Idea: AI Sales Coach"
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
+            className="rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
 
@@ -70,7 +70,7 @@ export default function EventForm({
             type="date"
             required
             defaultValue={event?.date ?? defaultDate ?? ""}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
+            className="rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
 
@@ -82,7 +82,7 @@ export default function EventForm({
             name="location"
             defaultValue={event ? (event.location ?? "") : "AI Fund Office"}
             placeholder="AI Fund Office"
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
+            className="rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
       </div>
@@ -92,7 +92,7 @@ export default function EventForm({
         <select
           name="status"
           defaultValue={event?.status ?? "draft"}
-          className="w-48 rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
+          className="w-48 rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-brand"
         >
           <option value="draft">Draft (hidden from attendees)</option>
           <option value="live">Live (check-in open)</option>
@@ -115,7 +115,7 @@ export default function EventForm({
           placeholder={
             "# The Idea\n\nOne-paragraph pitch…\n\n## The problem\n\n## Why now\n\n## Open questions for you"
           }
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
         />
         <span className="text-xs text-muted">
           This is what candidates read on their phones after checking in.
@@ -132,7 +132,7 @@ export default function EventForm({
             <button
               type="button"
               onClick={() => setNda(NDA_TEMPLATE)}
-              className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+              className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-muted hover:bg-[#fafaf8]"
             >
               Insert standard template
             </button>
@@ -144,7 +144,7 @@ export default function EventForm({
           value={nda}
           onChange={(e) => setNda(e.target.value)}
           placeholder="Leave empty for no NDA. If filled, attendees must read and accept it after checking in, before they can see the primer."
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
         />
         <span className="text-xs text-muted">
           Acceptance is recorded per attendee with a timestamp (visible in the

@@ -24,13 +24,13 @@ export default function NdaGate({
       <p className="text-xs font-medium uppercase tracking-widest text-brand">
         AI Fund · EIR Event
       </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="mt-1 text-2xl font-serif font-semibold tracking-tight">{title}</h1>
       <p className="mt-1 text-sm text-muted">
         One more step, {attendeeName.split(" ")[0]} — please review the
         agreement below to continue.
       </p>
 
-      <article className="prose-primer mt-6 max-h-[50vh] overflow-y-auto rounded-xl border border-zinc-200 bg-white p-5 text-[15px] shadow-sm">
+      <article className="prose-primer mt-6 max-h-[50vh] overflow-y-auto rounded-3xl border border-line bg-white p-5 text-[15px] shadow-soft">
         <ReactMarkdown>{nda}</ReactMarkdown>
       </article>
 
@@ -41,7 +41,7 @@ export default function NdaGate({
             type="checkbox"
             name="agree"
             required
-            className="mt-1 h-5 w-5 accent-[var(--series-1)]"
+            className="mt-1 h-5 w-5 accent-[var(--accent)]"
           />
           <span className="text-sm leading-snug">
             I, <span className="font-medium">{attendeeName}</span>, have read

@@ -129,7 +129,7 @@ export default function PrimerGenerator({
   const hasSource = Boolean(file) || transcript.trim().length > 0;
 
   return (
-    <div className="rounded-xl border border-brand-light bg-brand-light/30 p-4">
+    <div className="rounded-3xl border border-brand-light bg-brand-light/30 p-4">
       <p className="text-sm font-medium">✨ Generate the primer with AI</p>
       <p className="mt-0.5 text-xs text-muted">
         Upload a deck or memo, record a voice note, or paste rough notes — the
@@ -147,7 +147,7 @@ export default function PrimerGenerator({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-medium text-muted hover:bg-[#fafaf8]"
         >
           {file ? "Change document" : "📄 Upload PDF / doc"}
         </button>
@@ -158,7 +158,7 @@ export default function PrimerGenerator({
             className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
               recording
                 ? "border-red-300 bg-red-50 text-red-700"
-                : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                : "border-line bg-white text-muted hover:bg-[#fafaf8]"
             }`}
           >
             {recording ? "■ Stop recording" : "🎤 Record voice note"}
@@ -174,7 +174,7 @@ export default function PrimerGenerator({
                 setFile(null);
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
-              className="rounded px-1 text-zinc-500 hover:text-zinc-800"
+              className="rounded px-1 text-faint hover:text-foreground"
             >
               ✕
             </button>
@@ -189,7 +189,7 @@ export default function PrimerGenerator({
             onChange={(e) => setTranscript(e.target.value)}
             rows={4}
             placeholder="Your voice note transcript appears here — you can edit it."
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand"
           />
           {recording && (
             <p className="mt-1 text-xs font-medium text-red-600">
@@ -204,7 +204,7 @@ export default function PrimerGenerator({
           onChange={(e) => setTranscript(e.target.value)}
           rows={2}
           placeholder="…or type / paste rough notes about the idea here."
-          className="mt-3 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+          className="mt-3 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand"
         />
       )}
 

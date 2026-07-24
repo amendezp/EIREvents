@@ -18,7 +18,7 @@ export default async function Home() {
         <p className="text-sm font-medium uppercase tracking-widest text-brand">
           AI Fund
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+        <h1 className="mt-2 text-3xl font-serif font-semibold tracking-tight">
           EIR Events
         </h1>
         <p className="mt-4 text-muted leading-relaxed">
@@ -37,7 +37,7 @@ export default async function Home() {
               <li key={event.id}>
                 <Link
                   href={`/e/${event.code}`}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:border-brand"
+                  className="flex items-center justify-between gap-3 rounded-3xl border border-line bg-white p-4 shadow-soft transition-colors hover:border-brand"
                 >
                   <span>
                     <span className="flex items-center gap-2 font-medium">
@@ -62,7 +62,7 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <section className="mt-6 rounded-3xl border border-line bg-white p-5 shadow-soft">
         <h2 className="font-medium">
           {liveEvents.length > 0 ? "Have an event code?" : "Joining an event?"}
         </h2>

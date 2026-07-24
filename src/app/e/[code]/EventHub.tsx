@@ -63,7 +63,7 @@ export default function EventHub({
         <p className="text-xs font-medium uppercase tracking-widest text-brand">
           AI Fund · EIR Event
         </p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-xl font-serif font-semibold tracking-tight">
           {event.title}
         </h1>
         <p className="mt-0.5 text-sm text-muted">
@@ -72,14 +72,14 @@ export default function EventHub({
           {attendeeName.split(" ")[0]} 👋
         </p>
         {event.closed && (
-          <p className="mt-2 rounded-md bg-zinc-100 px-3 py-1.5 text-xs text-muted">
+          <p className="mt-2 rounded-md bg-[#efeeea] px-3 py-1.5 text-xs text-muted">
             This event has ended — you can still read the primer.
           </p>
         )}
       </header>
 
       {/* One tab bar: fixed at the bottom on phones, inline under the header on larger screens */}
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] sm:static sm:border-t-0 sm:border-b sm:bg-transparent sm:pb-0">
+      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] sm:static sm:border-t-0 sm:border-b sm:bg-transparent sm:pb-0">
         <div className="mx-auto grid max-w-md grid-cols-3 sm:mx-0 sm:flex sm:max-w-none sm:gap-6 sm:px-5">
           {TABS.map(([key, label]) => (
             <button
@@ -156,7 +156,7 @@ function QATab({
             required
             maxLength={1000}
             placeholder="Ask anything about the idea — we'll answer live or follow up after."
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+            className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
           />
           {state.error && (
             <p className="text-sm font-medium text-red-600">{state.error}</p>
@@ -173,14 +173,14 @@ function QATab({
 
       <ul className="flex flex-col gap-2.5">
         {questions.length === 0 && (
-          <li className="rounded-xl border border-dashed border-zinc-300 p-5 text-center text-sm text-muted">
+          <li className="rounded-3xl border border-dashed border-[#ddd9d0] p-5 text-center text-sm text-muted">
             No questions yet — be the first to ask.
           </li>
         )}
         {questions.map((q) => (
           <li
             key={q.id}
-            className="rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm"
+            className="rounded-3xl border border-line bg-white p-3.5 shadow-soft"
           >
             <div className="flex items-start justify-between gap-3">
               <p className="text-[15px] leading-snug">{q.body}</p>
@@ -194,7 +194,7 @@ function QATab({
                   className={`flex min-w-11 flex-col items-center rounded-lg border px-2 py-1 text-xs font-medium ${
                     q.voted
                       ? "border-brand bg-brand-light text-brand"
-                      : "border-zinc-300 text-muted"
+                      : "border-line text-muted"
                   }`}
                 >
                   <span aria-hidden>▲</span>
@@ -236,7 +236,7 @@ function ShareTab({
 
   if (closed) {
     return (
-      <p className="rounded-xl border border-zinc-200 bg-white p-5 text-sm text-muted">
+      <p className="rounded-3xl border border-line bg-white p-5 text-sm text-muted">
         The event has ended and feedback is closed. Thanks for sharing your
         thoughts!
       </p>
@@ -262,7 +262,7 @@ function ShareTab({
                 onChange={() => setInterest(n)}
                 className="peer sr-only"
               />
-              <span className="flex cursor-pointer items-center justify-center rounded-lg border border-zinc-300 bg-white py-2.5 text-base font-medium peer-checked:border-brand peer-checked:bg-brand-light peer-checked:text-brand">
+              <span className="flex cursor-pointer items-center justify-center rounded-lg border border-line bg-white py-2.5 text-base font-medium peer-checked:border-brand peer-checked:bg-brand-light peer-checked:text-brand">
                 {n}
               </span>
             </label>
@@ -294,7 +294,7 @@ function ShareTab({
                 defaultChecked={myFeedback?.wouldJoin === value}
                 className="peer sr-only"
               />
-              <span className="flex cursor-pointer items-center justify-center rounded-lg border border-zinc-300 bg-white py-2.5 text-sm font-medium peer-checked:border-brand peer-checked:bg-brand-light peer-checked:text-brand">
+              <span className="flex cursor-pointer items-center justify-center rounded-lg border border-line bg-white py-2.5 text-sm font-medium peer-checked:border-brand peer-checked:bg-brand-light peer-checked:text-brand">
                 {label}
               </span>
             </label>
@@ -312,7 +312,7 @@ function ShareTab({
           maxLength={4000}
           defaultValue={myFeedback?.vision ?? ""}
           placeholder="The 10-year ambition if this works…"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
         />
       </label>
 
@@ -326,7 +326,7 @@ function ShareTab({
           maxLength={4000}
           defaultValue={myFeedback?.challenges ?? ""}
           placeholder="Technical, market, or go-to-market hurdles…"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
         />
       </label>
 
@@ -340,7 +340,7 @@ function ShareTab({
           maxLength={4000}
           defaultValue={myFeedback?.assumptions ?? ""}
           placeholder="The riskiest bets to test first…"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
         />
       </label>
 
@@ -354,7 +354,7 @@ function ShareTab({
           maxLength={4000}
           defaultValue={myFeedback?.body ?? ""}
           placeholder="What excites you? What concerns you? How would you approach building it?"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+          className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
         />
       </label>
 

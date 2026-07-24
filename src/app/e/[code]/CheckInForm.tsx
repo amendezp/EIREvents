@@ -25,14 +25,14 @@ export default function CheckInForm({
       <p className="text-xs font-medium uppercase tracking-widest text-brand">
         AI Fund · EIR Event
       </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="mt-1 text-2xl font-serif font-semibold tracking-tight">{title}</h1>
       <p className="mt-1 text-sm text-muted">
         {date}
         {location ? ` · ${location}` : ""}
       </p>
 
       {closed ? (
-        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="mt-8 rounded-3xl border border-line bg-white p-5 shadow-soft">
           <h2 className="font-medium">This event has ended</h2>
           <p className="mt-1 text-sm text-muted">
             Check-in is closed. Thanks for your interest — the AI Fund team
@@ -50,7 +50,7 @@ export default function CheckInForm({
               name="name"
               required
               autoComplete="name"
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+              className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
               placeholder="Ada Lovelace"
             />
           </label>
@@ -62,7 +62,7 @@ export default function CheckInForm({
               type="email"
               required
               autoComplete="email"
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+              className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
               placeholder="ada@example.com"
             />
           </label>
@@ -75,7 +75,7 @@ export default function CheckInForm({
               <input
                 name="role"
                 autoComplete="organization-title"
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+                className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
                 placeholder="Staff Engineer"
               />
             </label>
@@ -87,7 +87,7 @@ export default function CheckInForm({
               <input
                 name="company"
                 autoComplete="organization"
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+                className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
                 placeholder="Acme"
               />
             </label>
@@ -100,7 +100,7 @@ export default function CheckInForm({
             <input
               name="linkedin"
               type="url"
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+              className="rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
               placeholder="https://linkedin.com/in/…"
             />
           </label>

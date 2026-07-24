@@ -11,13 +11,13 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-200 bg-white">
+      <header className="border-b border-line bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/admin" className="flex items-baseline gap-2">
             <span className="text-sm font-medium uppercase tracking-widest text-brand">
               AI Fund
             </span>
-            <span className="font-semibold">EIR Events</span>
+            <span className="font-serif font-semibold">EIR Events</span>
           </Link>
           <form action={adminLogout}>
             <button

@@ -136,7 +136,7 @@ export default async function EventDashboard({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-serif font-semibold tracking-tight">
               {event.title}
             </h1>
             <Link
@@ -151,7 +151,7 @@ export default async function EventDashboard({
             {event.location ? ` · ${event.location}` : ""}
           </p>
         </div>
-        <div className="flex rounded-lg border border-zinc-300 bg-white p-0.5">
+        <div className="flex rounded-lg border border-line bg-white p-0.5">
           {(["draft", "live", "closed"] as const).map((status) => (
             <form key={status} action={setEventStatus}>
               <input type="hidden" name="id" value={id} />
@@ -172,13 +172,13 @@ export default async function EventDashboard({
       </div>
 
       {/* Join info */}
-      <section className="mt-6 flex flex-wrap items-center gap-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <section className="mt-6 flex flex-wrap items-center gap-6 rounded-3xl border border-line bg-white p-5 shadow-soft">
         {/* QR rendered at 2x for crisp projection */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={qrDataUrl}
           alt={`QR code linking to ${joinUrl}`}
-          className="h-28 w-28 rounded-md border border-zinc-200"
+          className="h-28 w-28 rounded-md border border-line"
         />
         <div>
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted">
@@ -193,7 +193,7 @@ export default async function EventDashboard({
             <a
               href={qrDataUrl}
               download={`eir-event-${event.code}-qr.png`}
-              className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+              className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-muted hover:bg-[#fafaf8]"
             >
               Download QR
             </a>
@@ -202,13 +202,13 @@ export default async function EventDashboard({
         <div className="ml-auto flex flex-col gap-2">
           <a
             href={`/admin/events/${id}/export?type=attendees`}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+            className="rounded-md border border-line bg-white px-3 py-1.5 text-center text-xs font-medium text-muted hover:bg-[#fafaf8]"
           >
             Export attendees CSV
           </a>
           <a
             href={`/admin/events/${id}/export?type=questions`}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+            className="rounded-md border border-line bg-white px-3 py-1.5 text-center text-xs font-medium text-muted hover:bg-[#fafaf8]"
           >
             Export questions CSV
           </a>
@@ -249,7 +249,7 @@ export default async function EventDashboard({
 
       {/* Charts */}
       <section className="mt-6 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-line bg-white p-5 shadow-soft">
           <h2 className="text-sm font-medium">Excitement about the idea</h2>
           <p className="text-xs text-muted">
             Self-reported, 1 (not for me) to 5 (very excited)
@@ -280,7 +280,7 @@ export default async function EventDashboard({
           </div>
         </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-line bg-white p-5 shadow-soft">
           <h2 className="text-sm font-medium">
             “Could you see yourself building this?”
           </h2>
@@ -310,7 +310,7 @@ export default async function EventDashboard({
                   <span key={k} className="flex items-center gap-1.5">
                     <span
                       aria-hidden
-                      className="h-3 w-3 rounded-sm border border-zinc-300"
+                      className="h-3 w-3 rounded-sm border border-line"
                       style={{ background: WOULD_JOIN_COLORS[k] }}
                     />
                     <span className="text-muted">
@@ -329,7 +329,7 @@ export default async function EventDashboard({
 
       {/* Questions */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-lg font-serif font-semibold tracking-tight">
           Questions{" "}
           <span className="text-sm font-normal text-muted">
             sorted by upvotes — mark answered as you go
@@ -337,15 +337,15 @@ export default async function EventDashboard({
         </h2>
         <ul className="mt-3 flex flex-col gap-2">
           {questionRows.length === 0 && (
-            <li className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-sm text-muted">
+            <li className="rounded-3xl border border-dashed border-[#ddd9d0] p-6 text-center text-sm text-muted">
               No questions yet.
             </li>
           )}
           {questionRows.map((q) => (
             <li
               key={q.id}
-              className={`flex items-start justify-between gap-4 rounded-xl border bg-white p-4 shadow-sm ${
-                q.answered ? "border-zinc-200 opacity-70" : "border-zinc-200"
+              className={`flex items-start justify-between gap-4 rounded-3xl border bg-white p-4 shadow-soft ${
+                q.answered ? "border-line opacity-70" : "border-line"
               }`}
             >
               <div>
@@ -367,7 +367,7 @@ export default async function EventDashboard({
                   type="submit"
                   className={`whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium ${
                     q.answered
-                      ? "border-zinc-300 text-muted hover:text-foreground"
+                      ? "border-line text-muted hover:text-foreground"
                       : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                   }`}
                 >
@@ -381,17 +381,17 @@ export default async function EventDashboard({
 
       {/* Feedback */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold tracking-tight">Feedback</h2>
+        <h2 className="text-lg font-serif font-semibold tracking-tight">Feedback</h2>
         <ul className="mt-3 flex flex-col gap-2">
           {feedbackRows.length === 0 && (
-            <li className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-sm text-muted">
+            <li className="rounded-3xl border border-dashed border-[#ddd9d0] p-6 text-center text-sm text-muted">
               No feedback yet.
             </li>
           )}
           {feedbackRows.map((f) => (
             <li
               key={f.id}
-              className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+              className="rounded-3xl border border-line bg-white p-4 shadow-soft"
             >
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-medium">{f.name ?? "Unknown"}</span>
@@ -401,7 +401,7 @@ export default async function EventDashboard({
                   </span>
                 )}
                 {f.wouldJoin && (
-                  <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-700">
+                  <span className="rounded bg-[#efeeea] px-1.5 py-0.5 text-xs font-medium text-muted">
                     Would join: {WOULD_JOIN_LABELS[f.wouldJoin] ?? f.wouldJoin}
                   </span>
                 )}
@@ -438,16 +438,16 @@ export default async function EventDashboard({
 
       {/* Attendees */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-lg font-serif font-semibold tracking-tight">
           Attendees{" "}
           <span className="text-sm font-normal text-muted">
             {attendeeRows.length} checked in
           </span>
         </h2>
-        <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="mt-3 overflow-x-auto rounded-3xl border border-line bg-white shadow-soft">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-muted">
+              <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Role</th>
@@ -477,7 +477,7 @@ export default async function EventDashboard({
                 return (
                   <tr
                     key={a.id}
-                    className="border-b border-zinc-100 last:border-0"
+                    className="border-b border-[#f2f1ee] last:border-0"
                   >
                     <td className="px-4 py-3 font-medium">{a.name}</td>
                     <td className="px-4 py-3 text-muted">{a.email}</td>
@@ -540,11 +540,11 @@ function StatTile({
   detail?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-line bg-white p-5 shadow-soft">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
-      <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">
+      <p className="mt-1 font-serif text-3xl font-semibold tabular-nums tracking-tight">
         {value}
       </p>
       {detail && <p className="mt-0.5 text-xs text-muted">{detail}</p>}

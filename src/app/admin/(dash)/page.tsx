@@ -5,7 +5,7 @@ import { attendees, events, questions } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 
 const STATUS_STYLES: Record<string, string> = {
-  draft: "bg-zinc-100 text-zinc-600",
+  draft: "bg-[#efeeea] text-muted",
   live: "bg-emerald-50 text-emerald-700",
   closed: "bg-amber-50 text-amber-700",
 };
@@ -37,7 +37,7 @@ export default async function AdminHome() {
   return (
     <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Events</h1>
+        <h1 className="text-2xl font-serif font-semibold tracking-tight">Events</h1>
         <Link
           href="/admin/events/new"
           className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white"
@@ -47,17 +47,17 @@ export default async function AdminHome() {
       </div>
 
       {sorted.length === 0 ? (
-        <div className="mt-10 rounded-xl border border-dashed border-zinc-300 p-10 text-center text-muted">
+        <div className="mt-10 rounded-3xl border border-dashed border-[#ddd9d0] p-10 text-center text-muted">
           <p className="font-medium text-foreground">No events yet</p>
           <p className="mt-1 text-sm">
             Create your first EIR event to get a check-in link and QR code.
           </p>
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="mt-6 overflow-x-auto rounded-3xl border border-line bg-white shadow-soft">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-muted">
+              <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-medium">Event</th>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -70,7 +70,7 @@ export default async function AdminHome() {
               {sorted.map((event) => (
                 <tr
                   key={event.id}
-                  className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50"
+                  className="border-b border-[#f2f1ee] last:border-0 hover:bg-[#fafaf8]"
                 >
                   <td className="px-4 py-3">
                     <Link

@@ -1,12 +1,19 @@
 @import "tailwindcss";
 
-/* Light-only UI for now; dark mode is a deliberate future addition. */
+/* Warm, editorial light theme; dark mode is a deliberate future addition. */
 :root {
   color-scheme: light;
-  --background: #fafaf8;
-  --foreground: #111110;
-  --muted: #52514e;
-  /* Validated data-viz slots (single blue hue + sequential steps). */
+  --background: #f7f7f6;
+  --foreground: #383d42;
+  --muted: #686d73;
+  --faint: #a9afb5;
+  --line: #ebe9e3;
+  /* Warm accent family: --accent for decor, --brand is the accessible ink
+     used for text and filled buttons (AA on white and on the background). */
+  --accent: #ff5c00;
+  --brand: #c24e00;
+  --brand-light: #fff1e8;
+  /* Validated data-viz slots (charts only — do not use for UI chrome). */
   --series-1: #2a78d6;
   --series-1-mid: #7fb0e8;
   --series-1-light: #d3e3f6;
@@ -16,11 +23,15 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-brand: var(--series-1);
-  --color-brand-mid: var(--series-1-mid);
-  --color-brand-light: var(--series-1-light);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 body {
@@ -28,29 +39,34 @@ body {
   color: var(--foreground);
 }
 
+.prose-primer {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
 .prose-primer h1 {
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 650;
+  letter-spacing: -0.01em;
   margin: 1.25rem 0 0.5rem;
 }
 .prose-primer h2 {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 650;
-  margin: 1.25rem 0 0.4rem;
+  letter-spacing: -0.01em;
+  margin: 1.4rem 0 0.4rem;
 }
 .prose-primer h3 {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 650;
   margin: 1rem 0 0.3rem;
 }
 .prose-primer p {
   margin: 0.6rem 0;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 .prose-primer ul,
 .prose-primer ol {
   margin: 0.6rem 0 0.6rem 1.25rem;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .prose-primer ul {
   list-style: disc;
@@ -59,14 +75,14 @@ body {
   list-style: decimal;
 }
 .prose-primer a {
-  color: var(--series-1);
+  color: var(--brand);
   text-decoration: underline;
 }
 .prose-primer strong {
   font-weight: 650;
 }
 .prose-primer blockquote {
-  border-left: 3px solid var(--series-1-light);
+  border-left: 3px solid var(--line);
   padding-left: 0.75rem;
   color: var(--muted);
   margin: 0.75rem 0;

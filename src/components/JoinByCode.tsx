@@ -24,7 +24,7 @@ export default function JoinByCode() {
         autoCorrect="off"
         spellCheck={false}
         maxLength={12}
-        className="min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2.5 font-mono text-base uppercase outline-none focus:border-brand"
+        className="min-w-0 flex-1 rounded-lg border border-line bg-white px-3 py-2.5 font-mono text-base uppercase outline-none focus:border-brand"
       />
       <button
         type="submit"
