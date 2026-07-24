@@ -9,13 +9,16 @@ const DDL = `
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE, title TEXT NOT NULL,
   date TEXT NOT NULL, location TEXT, primer TEXT NOT NULL DEFAULT '',
+  nda TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'live', created_at BIGINT NOT NULL
 );
+ALTER TABLE events ADD COLUMN IF NOT EXISTS nda TEXT NOT NULL DEFAULT '';
 CREATE TABLE IF NOT EXISTS attendees (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
-  role TEXT, company TEXT, linkedin TEXT, checked_in_at BIGINT NOT NULL
+  role TEXT, company TEXT, linkedin TEXT, nda_accepted_at BIGINT, checked_in_at BIGINT NOT NULL
 );
 ALTER TABLE attendees ADD COLUMN IF NOT EXISTS company TEXT;
+ALTER TABLE attendees ADD COLUMN IF NOT EXISTS nda_accepted_at BIGINT;
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_event_email ON attendees(event_id, email);
 CREATE TABLE IF NOT EXISTS questions (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, attendee_id TEXT NOT NULL,
@@ -96,8 +99,21 @@ Ramping a new sales rep takes 6–9 months, and most coaching happens on <5% of 
 - What's the wedge: the rep, the manager, or enablement?
 - What would make you leave your job to build this?`;
 
+const nda = `# Non-Disclosure Agreement
+
+By continuing, you ("Recipient") agree to the following with AI Fund ("Discloser"):
+
+1. **Confidential Information.** Any non-public information shared at this event — including the business idea, market analyses, strategies, and the contents of the discussion — is Confidential Information.
+2. **Use.** Recipient will use Confidential Information solely to participate in this event and evaluate a potential role, and for no other purpose.
+3. **Non-disclosure.** Recipient will not disclose Confidential Information to any third party and will protect it with at least reasonable care.
+4. **Exclusions.** Information that is or becomes public through no fault of Recipient, was already lawfully known to Recipient, or is independently developed is not Confidential Information.
+5. **Term.** These obligations last for two (2) years from today.
+6. **No license.** No rights or licenses are granted by this disclosure.
+
+Selecting "Agree and continue" constitutes your electronic signature.`;
+
 await db.query(
-  "INSERT INTO events (id, code, title, date, location, primer, status, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+  "INSERT INTO events (id, code, title, date, location, primer, nda, status, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
   [
     eventId,
     CODE,
@@ -105,6 +121,7 @@ await db.query(
     new Date().toISOString().slice(0, 10),
     "AI Fund office, Palo Alto",
     primer,
+    nda,
     "live",
     now,
   ],
@@ -138,9 +155,10 @@ const attendeeIds = [];
 for (const [i, [name, email, role, company, interest, wouldJoin, vision, challenges, assumptions, body]] of people.entries()) {
   const aid = id();
   attendeeIds.push(aid);
+  const checkedInAt = now - (60 - i * 7) * 60000;
   await db.query(
-    "INSERT INTO attendees (id, event_id, name, email, role, company, linkedin, checked_in_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
-    [aid, eventId, name, email, role, company, null, now - (60 - i * 7) * 60000],
+    "INSERT INTO attendees (id, event_id, name, email, role, company, linkedin, nda_accepted_at, checked_in_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+    [aid, eventId, name, email, role, company, null, checkedInAt + 60000, checkedInAt],
   );
   await db.query(
     "INSERT INTO feedback (id, event_id, attendee_id, interest, would_join, vision, challenges, assumptions, body, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",

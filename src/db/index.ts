@@ -17,9 +17,11 @@ CREATE TABLE IF NOT EXISTS events (
   date TEXT NOT NULL,
   location TEXT,
   primer TEXT NOT NULL DEFAULT '',
+  nda TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'live',
   created_at BIGINT NOT NULL
 );
+ALTER TABLE events ADD COLUMN IF NOT EXISTS nda TEXT NOT NULL DEFAULT '';
 CREATE TABLE IF NOT EXISTS attendees (
   id TEXT PRIMARY KEY,
   event_id TEXT NOT NULL,
@@ -28,9 +30,11 @@ CREATE TABLE IF NOT EXISTS attendees (
   role TEXT,
   company TEXT,
   linkedin TEXT,
+  nda_accepted_at BIGINT,
   checked_in_at BIGINT NOT NULL
 );
 ALTER TABLE attendees ADD COLUMN IF NOT EXISTS company TEXT;
+ALTER TABLE attendees ADD COLUMN IF NOT EXISTS nda_accepted_at BIGINT;
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_event_email ON attendees(event_id, email);
 CREATE TABLE IF NOT EXISTS questions (
   id TEXT PRIMARY KEY,

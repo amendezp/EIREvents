@@ -115,6 +115,9 @@ export default async function EventDashboard({
   const wouldJoinTotal =
     wouldJoinCounts.yes + wouldJoinCounts.maybe + wouldJoinCounts.no;
 
+  const ndaRequired = event.nda.trim().length > 0;
+  const ndaSigned = attendeeRows.filter((a) => a.ndaAcceptedAt).length;
+
   const feedbackByAttendee = new Map(
     feedbackRows.map((f) => [f.email, f]),
   );
@@ -214,7 +217,11 @@ export default async function EventDashboard({
 
       {/* KPI tiles */}
       <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatTile label="Checked in" value={String(attendeeRows.length)} />
+        <StatTile
+          label="Checked in"
+          value={String(attendeeRows.length)}
+          detail={ndaRequired ? `${ndaSigned} signed the NDA` : undefined}
+        />
         <StatTile
           label="Questions"
           value={String(questionRows.length)}
@@ -447,6 +454,9 @@ export default async function EventDashboard({
                 <th className="px-4 py-3 font-medium">Company</th>
                 <th className="px-4 py-3 font-medium">LinkedIn</th>
                 <th className="px-4 py-3 font-medium">Checked in</th>
+                {ndaRequired && (
+                  <th className="px-4 py-3 font-medium">NDA</th>
+                )}
                 <th className="px-4 py-3 text-right font-medium">Excitement</th>
                 <th className="px-4 py-3 font-medium">Would join</th>
               </tr>
@@ -454,7 +464,10 @@ export default async function EventDashboard({
             <tbody>
               {attendeeRows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
+                  <td
+                    colSpan={ndaRequired ? 9 : 8}
+                    className="px-4 py-8 text-center text-muted"
+                  >
                     No one has checked in yet — share the QR code above.
                   </td>
                 </tr>
@@ -487,6 +500,17 @@ export default async function EventDashboard({
                     <td className="px-4 py-3 tabular-nums text-muted">
                       {formatTime(a.checkedInAt)}
                     </td>
+                    {ndaRequired && (
+                      <td className="px-4 py-3 text-muted">
+                        {a.ndaAcceptedAt ? (
+                          <span className="font-medium text-emerald-700">
+                            ✓ {formatTime(a.ndaAcceptedAt)}
+                          </span>
+                        ) : (
+                          "not signed"
+                        )}
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-right tabular-nums">
                       {f?.interest != null ? `${f.interest}/5` : "—"}
                     </td>

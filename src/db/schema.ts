@@ -14,6 +14,7 @@ export const events = pgTable("events", {
   date: text("date").notNull(),
   location: text("location"),
   primer: text("primer").notNull().default(""),
+  nda: text("nda").notNull().default(""),
   status: text("status").notNull().default("live"),
   createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
@@ -28,6 +29,7 @@ export const attendees = pgTable(
     role: text("role"),
     company: text("company"),
     linkedin: text("linkedin"),
+    ndaAcceptedAt: bigint("nda_accepted_at", { mode: "number" }),
     checkedInAt: bigint("checked_in_at", { mode: "number" }).notNull(),
   },
   (t) => [uniqueIndex("attendee_event_email").on(t.eventId, t.email)],

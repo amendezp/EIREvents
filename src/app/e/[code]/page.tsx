@@ -12,6 +12,7 @@ import { getAttendeeId } from "@/lib/session";
 import AutoRefresh from "@/components/AutoRefresh";
 import CheckInForm from "./CheckInForm";
 import EventHub from "./EventHub";
+import NdaGate from "./NdaGate";
 
 export default async function EventPage({
   params,
@@ -50,6 +51,29 @@ export default async function EventPage({
         date={event.date}
         location={event.location}
         closed={event.status === "closed"}
+      />
+    );
+  }
+
+  // NDA gate: nothing beyond check-in is visible until it's accepted.
+  if (event.nda.trim() && !attendee.ndaAcceptedAt) {
+    if (event.status !== "live") {
+      return (
+        <CheckInForm
+          code={code}
+          title={event.title}
+          date={event.date}
+          location={event.location}
+          closed
+        />
+      );
+    }
+    return (
+      <NdaGate
+        code={code}
+        title={event.title}
+        nda={event.nda}
+        attendeeName={attendee.name}
       />
     );
   }

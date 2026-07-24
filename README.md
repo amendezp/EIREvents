@@ -10,12 +10,15 @@ with live attendance, engagement metrics, and CSV exports for follow-up.
 **Candidate flow (mobile-first)** — each event gets a short code and a QR code.
 Attendees scan it, land on `/e/<CODE>`, and:
 
-1. **Check in** — name, email, current role, LinkedIn (30 seconds, no account)
-2. **The Idea** — read the primer for the idea being presented (Markdown)
-3. **Q&A** — ask questions and upvote others' questions; answered questions get
+1. **Check in** — name, email, role, company, LinkedIn (30 seconds, no account)
+2. **NDA** (if the event has one) — read and accept before anything else is
+   shown; acceptance is recorded with a timestamp
+3. **The Idea** — read the primer for the idea being presented (Markdown)
+4. **Q&A** — ask questions and upvote others' questions; answered questions get
    marked live, and unanswered ones are captured for follow-up
-4. **Your Take** — excitement rating (1–5), "could you see yourself building
-   this?" (yes / maybe / not now), and free-form feedback — editable any time
+5. **Your Take** — excitement rating (1–5), "could you see yourself building
+   this?" (yes / maybe / not now), plus vision, main challenges, assumptions to
+   validate, and free-form feedback — editable any time
 
 **Admin dashboard (desktop, at `/admin`)** — password-protected:
 
@@ -24,6 +27,9 @@ Attendees scan it, land on `/e/<CODE>`, and:
 - AI primer generator: upload a deck/memo (PDF, DOCX, TXT, MD) or record a
   voice note (transcribed in the browser) and Claude drafts a high-level,
   discussion-ready primer you review before saving
+- Optional per-event NDA (Markdown, with a one-click standard template);
+  attendees must accept it after check-in, and acceptance timestamps appear
+  in the attendee table and CSV export
 - Projectable QR code + join link per event
 - Live metrics: check-ins, open questions, average excitement, would-join
   breakdown, excitement distribution (auto-refreshes every few seconds)

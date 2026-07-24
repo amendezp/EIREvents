@@ -39,8 +39,19 @@ await page.fill('input[name="email"]', "test.candidate@example.com");
 await page.fill('input[name="role"]', "Principal Engineer");
 await page.fill('input[name="company"]', "TestCo");
 await page.click('button[type="submit"]');
-await page.waitForSelector("nav >> text=Your Take", { timeout: 15000 });
 console.log("check-in OK");
+
+// NDA gate (demo event has one seeded)
+await page.waitForSelector("text=Non-Disclosure Agreement", { timeout: 15000 });
+await shot(page, "1b-nda");
+// Primer must not be reachable before accepting
+if ((await page.textContent("body")).includes("One-liner")) {
+  fail("primer visible before NDA acceptance");
+}
+await page.check('input[name="agree"]');
+await page.click('button:has-text("Agree and continue")');
+await page.waitForSelector("nav >> text=Your Take", { timeout: 15000 });
+console.log("NDA accept OK");
 await shot(page, "2-primer");
 
 await page.click("text=Q&A");

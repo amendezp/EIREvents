@@ -54,6 +54,7 @@ function eventFields(formData: FormData) {
     date: str(formData, "date"),
     location: str(formData, "location") || null,
     primer: String(formData.get("primer") ?? "").trim(),
+    nda: String(formData.get("nda") ?? "").trim(),
     status: str(formData, "status") || "draft",
   };
 }
@@ -174,6 +175,25 @@ export async function checkIn(
   }
 
   await setAttendeeCookie(event.id, attendeeId);
+  revalidatePath(`/e/${code}`);
+  return { ok: true };
+}
+
+export async function acceptNda(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const code = str(formData, "code").toUpperCase();
+  const ctx = await requireAttendee(code);
+  if (!ctx) return { error: "Please check in first." };
+  if (str(formData, "agree") !== "on") {
+    return { error: "Please confirm you agree before continuing." };
+  }
+  const db = await getDb();
+  await db
+    .update(attendees)
+    .set({ ndaAcceptedAt: Date.now() })
+    .where(eq(attendees.id, ctx.attendee.id));
   revalidatePath(`/e/${code}`);
   return { ok: true };
 }
