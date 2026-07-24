@@ -112,10 +112,11 @@ any domain you attach with no extra config.
   before being rendered as links; CSV exports guard against spreadsheet
   formula injection; Markdown rendering escapes HTML.
 - **Moderation**: admins can delete any question from the event dashboard.
-- **Landing page lists live events by title.** If an idea name is sensitive,
-  use a neutral event title (e.g. "EIR Dinner #12") or keep the event in
-  draft until doors open — the primer itself stays behind check-in (and the
-  NDA, if set).
+- **Landing page lists live events only on the day they happen** (evaluated
+  in `EVENT_TIMEZONE`, default America/Los_Angeles), so titles stay off the
+  public page outside the event itself. Joining by code still works for any
+  live event. For extra caution use a neutral title (e.g. "EIR Dinner #12")
+  — the primer itself stays behind check-in (and the NDA, if set).
 - **Recommended platform extras**: enable Neon's point-in-time restore
   (on by default), and consider Vercel's WAF/rate-limiting rules on
   `/admin/login` and `/api/generate-primer` for defense in depth.

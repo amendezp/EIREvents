@@ -1,9 +1,10 @@
 import EventForm from "@/components/EventForm";
+import { todayInEventTz } from "@/lib/dates";
 import { requireAdmin } from "@/lib/session";
 
 export default async function NewEventPage() {
   await requireAdmin();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInEventTz();
   return (
     <main>
       <h1 className="text-2xl font-serif font-semibold tracking-tight">New event</h1>

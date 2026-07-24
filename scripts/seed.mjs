@@ -118,7 +118,13 @@ await db.query(
     eventId,
     CODE,
     "EIR Dinner — Idea: AI Sales Coach",
-    new Date().toISOString().slice(0, 10),
+    // Match src/lib/dates.ts: "today" in the event timezone, not UTC.
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: process.env.EVENT_TIMEZONE || "America/Los_Angeles",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date()),
     "AI Fund office, Palo Alto",
     primer,
     nda,

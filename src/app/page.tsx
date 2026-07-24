@@ -1,16 +1,21 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import JoinByCode from "@/components/JoinByCode";
 import { getDb } from "@/db";
 import { events } from "@/db/schema";
+import { todayInEventTz } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const db = await getDb();
-  const liveEvents = (
-    await db.select().from(events).where(eq(events.status, "live"))
-  ).sort((a, b) => b.date.localeCompare(a.date));
+  // Only list events that are live AND happening today — titles stay off
+  // the public page outside the event itself. Joining by code still works
+  // for any live event.
+  const liveEvents = await db
+    .select()
+    .from(events)
+    .where(and(eq(events.status, "live"), eq(events.date, todayInEventTz())));
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
