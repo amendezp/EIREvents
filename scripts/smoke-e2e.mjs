@@ -127,6 +127,15 @@ await admin.waitForTimeout(1500);
 if (!(await admin.textContent("body")).includes("Reopen")) fail("mark-answered did not toggle");
 console.log("mark answered OK");
 
+// Moderation: delete the test question
+const delCard = admin.locator("li", { hasText: "How much of the first year" }).first();
+await delCard.locator('button:has-text("Delete")').click();
+await admin.waitForTimeout(1500);
+if ((await admin.textContent("body")).includes("How much of the first year")) {
+  fail("question delete failed");
+}
+console.log("delete question OK");
+
 const eventId = admin.url().split("/events/")[1].split("/")[0];
 const resp = await admin.request.get(`${BASE}/admin/events/${eventId}/export?type=attendees`);
 const csv = await resp.text();

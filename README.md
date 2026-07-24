@@ -100,6 +100,29 @@ Chromium instead of Playwright's managed download.
 The QR code and join links are derived from the request host, so they work on
 any domain you attach with no extra config.
 
+## Production checklist
+
+- **`ADMIN_PASSWORD` and `DATABASE_URL` are enforced** — Vercel deployments
+  fail loudly (instead of running insecurely) when either is missing. Use a
+  long random admin password; it is the only thing guarding the dashboard.
+- **Auth hardening built in**: timing-safe password comparison, escalating
+  delays on failed logins, HMAC-signed httpOnly cookies with the `secure`
+  flag in production, and per-event signed attendee identities.
+- **Attendee input is sanitized**: LinkedIn URLs are validated to http(s)
+  before being rendered as links; CSV exports guard against spreadsheet
+  formula injection; Markdown rendering escapes HTML.
+- **Moderation**: admins can delete any question from the event dashboard.
+- **Landing page lists live events by title.** If an idea name is sensitive,
+  use a neutral event title (e.g. "EIR Dinner #12") or keep the event in
+  draft until doors open — the primer itself stays behind check-in (and the
+  NDA, if set).
+- **Recommended platform extras**: enable Neon's point-in-time restore
+  (on by default), and consider Vercel's WAF/rate-limiting rules on
+  `/admin/login` and `/api/generate-primer` for defense in depth.
+- **Data privacy**: attendee PII (name, email, role, company, LinkedIn) and
+  their feedback live in your Postgres. There is no deletion UI yet — handle
+  erasure requests directly in the database for now.
+
 ## Roadmap ideas
 
 - Server-side voice transcription (current voice notes use the browser's

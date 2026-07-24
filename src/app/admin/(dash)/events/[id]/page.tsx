@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import AutoRefresh from "@/components/AutoRefresh";
 import CopyButton from "@/components/CopyButton";
+import LocalTime from "@/components/LocalTime";
 import { getDb } from "@/db";
 import {
   attendees,
@@ -13,7 +14,7 @@ import {
   questions,
   questionVotes,
 } from "@/db/schema";
-import { markAnswered, setEventStatus } from "@/lib/actions";
+import { deleteQuestion, markAnswered, setEventStatus } from "@/lib/actions";
 import { requireAdmin } from "@/lib/session";
 
 const WOULD_JOIN_COLORS: Record<string, string> = {
@@ -27,13 +28,6 @@ const WOULD_JOIN_LABELS: Record<string, string> = {
   maybe: "Maybe",
   no: "Not now",
 };
-
-function formatTime(ms: number): string {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(ms));
-}
 
 export default async function EventDashboard({
   params,
@@ -351,29 +345,41 @@ export default async function EventDashboard({
               <div>
                 <p className="text-[15px]">{q.body}</p>
                 <p className="mt-1 text-xs text-muted">
-                  {q.askerName ?? "Anonymous"} · {formatTime(q.createdAt)} ·{" "}
-                  {q.votes} upvote{q.votes === 1 ? "" : "s"}
+                  {q.askerName ?? "Anonymous"} · <LocalTime ms={q.createdAt} />{" "}
+                  · {q.votes} upvote{q.votes === 1 ? "" : "s"}
                 </p>
               </div>
-              <form action={markAnswered}>
-                <input type="hidden" name="questionId" value={q.id} />
-                <input type="hidden" name="eventId" value={id} />
-                <input
-                  type="hidden"
-                  name="answered"
-                  value={q.answered ? "0" : "1"}
-                />
-                <button
-                  type="submit"
-                  className={`whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                    q.answered
-                      ? "border-line text-muted hover:text-foreground"
-                      : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  }`}
-                >
-                  {q.answered ? "↩ Reopen" : "✓ Mark answered"}
-                </button>
-              </form>
+              <div className="flex flex-col items-end gap-1.5">
+                <form action={markAnswered}>
+                  <input type="hidden" name="questionId" value={q.id} />
+                  <input type="hidden" name="eventId" value={id} />
+                  <input
+                    type="hidden"
+                    name="answered"
+                    value={q.answered ? "0" : "1"}
+                  />
+                  <button
+                    type="submit"
+                    className={`whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                      q.answered
+                        ? "border-line text-muted hover:text-foreground"
+                        : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    }`}
+                  >
+                    {q.answered ? "↩ Reopen" : "✓ Mark answered"}
+                  </button>
+                </form>
+                <form action={deleteQuestion}>
+                  <input type="hidden" name="questionId" value={q.id} />
+                  <input type="hidden" name="eventId" value={id} />
+                  <button
+                    type="submit"
+                    className="text-xs text-faint hover:text-red-600"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </div>
             </li>
           ))}
         </ul>
@@ -498,13 +504,13 @@ export default async function EventDashboard({
                       )}
                     </td>
                     <td className="px-4 py-3 tabular-nums text-muted">
-                      {formatTime(a.checkedInAt)}
+                      <LocalTime ms={a.checkedInAt} />
                     </td>
                     {ndaRequired && (
                       <td className="px-4 py-3 text-muted">
                         {a.ndaAcceptedAt ? (
                           <span className="font-medium text-emerald-700">
-                            ✓ {formatTime(a.ndaAcceptedAt)}
+                            ✓ <LocalTime ms={a.ndaAcceptedAt} />
                           </span>
                         ) : (
                           "not signed"

@@ -13,19 +13,33 @@ import {
 } from "@/db/schema";
 import { newId, shortCode } from "@/lib/id";
 import {
-  adminPassword,
   clearAdminCookie,
   getAttendeeId,
   isAdmin,
+  loginFailureDelay,
   requireAdmin,
   setAdminCookie,
   setAttendeeCookie,
+  verifyAdminPassword,
 } from "@/lib/session";
 
 export type ActionState = { error?: string; ok?: boolean };
 
 const str = (formData: FormData, key: string) =>
   String(formData.get(key) ?? "").trim();
+
+// Attendee-supplied URLs are rendered as links in the admin UI — only
+// accept http(s) so a javascript: URL can never land in an href.
+function safeUrl(raw: string): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    return url.toString().slice(0, 500);
+  } catch {
+    return null;
+  }
+}
 
 // ---------- Admin auth ----------
 
@@ -34,7 +48,8 @@ export async function adminLogin(
   formData: FormData,
 ): Promise<ActionState> {
   const password = String(formData.get("password") ?? "");
-  if (password !== adminPassword()) {
+  if (!verifyAdminPassword(password)) {
+    await loginFailureDelay();
     return { error: "Incorrect password." };
   }
   await setAdminCookie();
@@ -101,6 +116,20 @@ export async function setEventStatus(formData: FormData): Promise<void> {
   revalidatePath(`/admin/events/${id}`);
 }
 
+export async function deleteQuestion(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const questionId = str(formData, "questionId");
+  const eventId = str(formData, "eventId");
+  const db = await getDb();
+  await db
+    .delete(questionVotes)
+    .where(eq(questionVotes.questionId, questionId));
+  await db
+    .delete(questions)
+    .where(and(eq(questions.id, questionId), eq(questions.eventId, eventId)));
+  revalidatePath(`/admin/events/${eventId}`);
+}
+
 export async function markAnswered(formData: FormData): Promise<void> {
   await requireAdmin();
   const questionId = str(formData, "questionId");
@@ -139,7 +168,7 @@ export async function checkIn(
   }
   const role = str(formData, "role") || null;
   const company = str(formData, "company") || null;
-  const linkedin = str(formData, "linkedin") || null;
+  const linkedin = safeUrl(str(formData, "linkedin"));
 
   const db = await getDb();
   const [existing] = await db

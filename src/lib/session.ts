@@ -5,10 +5,54 @@ import { redirect } from "next/navigation";
 const ADMIN_COOKIE = "eir_admin";
 const ADMIN_SESSION_MS = 1000 * 60 * 60 * 12;
 
-export const adminPassword = () => process.env.ADMIN_PASSWORD || "eir-admin";
+const onVercel = () => Boolean(process.env.VERCEL);
+const secureCookies = () => process.env.NODE_ENV === "production";
 
-const secret = () =>
-  process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD || "eir-dev-secret";
+export const adminPassword = (): string => {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (pw) return pw;
+  if (onVercel()) {
+    throw new Error(
+      "ADMIN_PASSWORD must be set in production — without it the admin " +
+        "dashboard would be protected by a publicly known default password.",
+    );
+  }
+  return "eir-admin";
+};
+
+const secret = (): string => {
+  const s = process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD;
+  if (s) return s;
+  if (onVercel()) {
+    throw new Error(
+      "SESSION_SECRET (or ADMIN_PASSWORD) must be set in production — " +
+        "without it session cookies would be forgeable.",
+    );
+  }
+  return "eir-dev-secret";
+};
+
+// Timing-safe comparison via fixed-length digests.
+export function verifyAdminPassword(input: string): boolean {
+  const expected = crypto.createHash("sha256").update(adminPassword()).digest();
+  const got = crypto.createHash("sha256").update(input).digest();
+  return crypto.timingSafeEqual(expected, got);
+}
+
+// Per-instance brute-force damper: failed logins get an escalating delay.
+let recentFailures = 0;
+let failureWindowStart = 0;
+
+export async function loginFailureDelay(): Promise<void> {
+  const now = Date.now();
+  if (now - failureWindowStart > 15 * 60_000) {
+    failureWindowStart = now;
+    recentFailures = 0;
+  }
+  recentFailures++;
+  const delayMs = Math.min(500 + recentFailures * 500, 5000);
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+}
 
 function hmac(value: string): string {
   return crypto
@@ -43,6 +87,7 @@ export async function setAdminCookie(): Promise<void> {
   (await cookies()).set(ADMIN_COOKIE, sign(`admin:${expiresAt}`), {
     httpOnly: true,
     sameSite: "lax",
+    secure: secureCookies(),
     path: "/",
     maxAge: ADMIN_SESSION_MS / 1000,
   });
@@ -69,6 +114,7 @@ export async function setAttendeeCookie(
   (await cookies()).set(`eir_att_${eventId}`, sign(attendeeId), {
     httpOnly: true,
     sameSite: "lax",
+    secure: secureCookies(),
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
