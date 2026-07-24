@@ -8,11 +8,13 @@
   --muted: #686d73;
   --faint: #a9afb5;
   --line: #ebe9e3;
-  /* Warm accent family: --accent for decor, --brand is the accessible ink
-     used for text and filled buttons (AA on white and on the background). */
-  --accent: #ff5c00;
-  --brand: #c24e00;
-  --brand-light: #fff1e8;
+  /* AI Fund blue accent family: --accent for decor (matches the chart
+     series hue for cohesion), --brand is the accessible ink used for text
+     and filled buttons (AA on white and on the background). Swap these
+     three values if the official brand hex differs. */
+  --accent: #2a78d6;
+  --brand: #2262b3;
+  --brand-light: #e8f0fa;
   /* Validated data-viz slots (charts only — do not use for UI chrome). */
   --series-1: #2a78d6;
   --series-1-mid: #7fb0e8;
