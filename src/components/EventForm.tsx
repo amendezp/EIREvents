@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
+import PrimerGenerator from "@/components/PrimerGenerator";
 import {
   createEvent,
   updateEvent,
@@ -11,6 +12,7 @@ const initialState: ActionState = {};
 
 export default function EventForm({
   event,
+  defaultDate,
 }: {
   event?: {
     id: string;
@@ -20,11 +22,14 @@ export default function EventForm({
     primer: string;
     status: string;
   };
+  defaultDate?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     event ? updateEvent : createEvent,
     initialState,
   );
+  const [primer, setPrimer] = useState(event?.primer ?? "");
+  const titleRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-5">
@@ -34,6 +39,7 @@ export default function EventForm({
         <label className="flex flex-col gap-1.5 sm:col-span-2">
           <span className="text-sm font-medium">Event title</span>
           <input
+            ref={titleRef}
             name="title"
             required
             defaultValue={event?.title ?? ""}
@@ -48,7 +54,7 @@ export default function EventForm({
             name="date"
             type="date"
             required
-            defaultValue={event?.date ?? ""}
+            defaultValue={event?.date ?? defaultDate ?? ""}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
@@ -59,8 +65,8 @@ export default function EventForm({
           </span>
           <input
             name="location"
-            defaultValue={event?.location ?? ""}
-            placeholder="AI Fund office, Palo Alto"
+            defaultValue={event ? (event.location ?? "") : "AI Fund Office"}
+            placeholder="AI Fund Office"
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
@@ -79,14 +85,20 @@ export default function EventForm({
         </select>
       </label>
 
+      <PrimerGenerator
+        getTitle={() => titleRef.current?.value ?? ""}
+        onGenerated={setPrimer}
+      />
+
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Idea primer (Markdown)</span>
         <textarea
           name="primer"
           rows={16}
-          defaultValue={event?.primer ?? ""}
+          value={primer}
+          onChange={(e) => setPrimer(e.target.value)}
           placeholder={
-            "# The Idea\n\nOne-paragraph pitch…\n\n## The problem\n\n## Why now\n\n## What we'd build first\n\n## Open questions for you"
+            "# The Idea\n\nOne-paragraph pitch…\n\n## The problem\n\n## Why now\n\n## Open questions for you"
           }
           className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm outline-none focus:border-brand"
         />

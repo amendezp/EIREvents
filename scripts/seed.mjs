@@ -13,8 +13,9 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE TABLE IF NOT EXISTS attendees (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
-  role TEXT, linkedin TEXT, checked_in_at BIGINT NOT NULL
+  role TEXT, company TEXT, linkedin TEXT, checked_in_at BIGINT NOT NULL
 );
+ALTER TABLE attendees ADD COLUMN IF NOT EXISTS company TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_event_email ON attendees(event_id, email);
 CREATE TABLE IF NOT EXISTS questions (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, attendee_id TEXT NOT NULL,
@@ -26,8 +27,11 @@ CREATE TABLE IF NOT EXISTS question_votes (
 );
 CREATE TABLE IF NOT EXISTS feedback (
   id TEXT PRIMARY KEY, event_id TEXT NOT NULL, attendee_id TEXT NOT NULL,
-  interest INTEGER, would_join TEXT, body TEXT, updated_at BIGINT NOT NULL
+  interest INTEGER, would_join TEXT, vision TEXT, challenges TEXT, assumptions TEXT, body TEXT, updated_at BIGINT NOT NULL
 );
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS vision TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS challenges TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS assumptions TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS feedback_event_attendee ON feedback(event_id, attendee_id);
 `;
 
@@ -86,12 +90,6 @@ Ramping a new sales rep takes 6–9 months, and most coaching happens on <5% of 
 - Sales teams already record everything — the data exists
 - Post-COVID sales orgs are remote-first: coaching moved from the sales floor to nowhere
 
-## What we'd build first
-
-1. Live call companion: objection detection + suggested responses
-2. Post-call scorecards tied to the team's actual playbook
-3. Manager dashboard: who needs coaching on what, this week
-
 ## Open questions for you
 
 - Would reps trust (or resent) a live copilot?
@@ -113,24 +111,40 @@ await db.query(
 );
 
 const people = [
-  ["Maya Chen", "maya@example.com", "Staff Engineer @ Stripe", 5, "yes", "Love the wedge via managers. I'd want to see latency numbers for real-time coaching before committing to an approach."],
-  ["Diego Ramos", "diego@example.com", "Founding Engineer @ (prev) Rippling", 4, "maybe", "Strong idea but crowded space — Gong will move here. The playbook-specific scorecards feel like the real moat."],
-  ["Priya Natarajan", "priya@example.com", "Senior SWE @ Google", 3, "maybe", null],
-  ["Sam Okafor", "sam@example.com", "EM @ Series B startup", 4, "yes", "Reps will resent it unless it's framed as their tool, not surveillance. Ship the rep-facing value first."],
-  ["Lena Fischer", "lena@example.com", "ML Engineer @ Meta", 2, "no", "Real-time ASR + suggestion quality is harder than it looks. I'd pick a narrower vertical."],
+  ["Maya Chen", "maya@example.com", "Staff Engineer", "Stripe", 5, "yes",
+    "Ambient coaching — every rep performs like the top 1% without a manager in the room.",
+    "Real-time latency and rep trust. If a suggestion lags or lands wrong once, reps turn it off.",
+    "That managers will actually act on the dashboard weekly, and call data is clean enough to coach from.",
+    "Love the wedge via managers. I'd want to see latency numbers for real-time coaching before committing to an approach."],
+  ["Diego Ramos", "diego@example.com", "Founding Engineer", "(prev) Rippling", 4, "maybe",
+    null,
+    "Gong moving down-market is the existential risk.",
+    null,
+    "Strong idea but crowded space — Gong will move here. The playbook-specific scorecards feel like the real moat."],
+  ["Priya Natarajan", "priya@example.com", "Senior SWE", "Google", 3, "maybe", null, null, null, null],
+  ["Sam Okafor", "sam@example.com", "Engineering Manager", "Series B startup", 4, "yes",
+    "The rep's personal coach — something they'd pay for themselves.",
+    null,
+    "That reps opt in voluntarily. I'd test a rep-first free tier before selling top-down.",
+    "Reps will resent it unless it's framed as their tool, not surveillance. Ship the rep-facing value first."],
+  ["Lena Fischer", "lena@example.com", "ML Engineer", "Meta", 2, "no",
+    null,
+    "ASR quality on noisy sales-floor audio.",
+    null,
+    "Real-time ASR + suggestion quality is harder than it looks. I'd pick a narrower vertical."],
 ];
 
 const attendeeIds = [];
-for (const [i, [name, email, role, interest, wouldJoin, body]] of people.entries()) {
+for (const [i, [name, email, role, company, interest, wouldJoin, vision, challenges, assumptions, body]] of people.entries()) {
   const aid = id();
   attendeeIds.push(aid);
   await db.query(
-    "INSERT INTO attendees (id, event_id, name, email, role, linkedin, checked_in_at) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-    [aid, eventId, name, email, role, null, now - (60 - i * 7) * 60000],
+    "INSERT INTO attendees (id, event_id, name, email, role, company, linkedin, checked_in_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+    [aid, eventId, name, email, role, company, null, now - (60 - i * 7) * 60000],
   );
   await db.query(
-    "INSERT INTO feedback (id, event_id, attendee_id, interest, would_join, body, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-    [id(), eventId, aid, interest, wouldJoin, body, now - i * 60000],
+    "INSERT INTO feedback (id, event_id, attendee_id, interest, would_join, vision, challenges, assumptions, body, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+    [id(), eventId, aid, interest, wouldJoin, vision, challenges, assumptions, body, now - i * 60000],
   );
 }
 

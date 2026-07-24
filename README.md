@@ -21,6 +21,9 @@ Attendees scan it, land on `/e/<CODE>`, and:
 
 - Create/edit events with a Markdown primer; status controls what attendees see
   (`draft` hidden → `live` open → `closed` read-only)
+- AI primer generator: upload a deck/memo (PDF, DOCX, TXT, MD) or record a
+  voice note (transcribed in the browser) and Claude drafts a high-level,
+  discussion-ready primer you review before saving
 - Projectable QR code + join link per event
 - Live metrics: check-ins, open questions, average excitement, would-join
   breakdown, excitement distribution (auto-refreshes every few seconds)
@@ -56,6 +59,8 @@ Copy `.env.example` to `.env.local`:
   when unset locally, an embedded Postgres (PGlite) in `./data/pg` is used
 - `ADMIN_PASSWORD` — admin dashboard password (**required in production**)
 - `SESSION_SECRET` — cookie-signing secret (falls back to `ADMIN_PASSWORD`)
+- `ANTHROPIC_API_KEY` — enables the AI primer generator (optional; the rest
+  of the app works without it)
 - `DATA_DIR` — where the local PGlite dev database lives (default `./data`)
 
 ## Testing
@@ -80,7 +85,8 @@ Chromium instead of Playwright's managed download.
    Postgres provider works too — just set `DATABASE_URL` yourself, using the
    provider's *pooled* connection string if it offers one.
 3. Set env vars (Project → Settings → Environment Variables):
-   `ADMIN_PASSWORD` (strong value) and `SESSION_SECRET` (long random string).
+   `ADMIN_PASSWORD` (strong value), `SESSION_SECRET` (long random string),
+   and optionally `ANTHROPIC_API_KEY` for the AI primer generator.
 4. Deploy. Tables are created automatically on first request; run
    `DATABASE_URL=<prod-url> npm run seed` locally if you want the demo event
    in production.
@@ -90,6 +96,8 @@ any domain you attach with no extra config.
 
 ## Roadmap ideas
 
+- Server-side voice transcription (current voice notes use the browser's
+  Web Speech API, which works in Chrome/Safari but not Firefox)
 - AI summary of questions + feedback per event (themes, objections, standouts)
 - Per-organizer accounts instead of a shared password
 - SSE for instant question updates on the projected screen

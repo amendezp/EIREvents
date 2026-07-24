@@ -26,9 +26,11 @@ CREATE TABLE IF NOT EXISTS attendees (
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   role TEXT,
+  company TEXT,
   linkedin TEXT,
   checked_in_at BIGINT NOT NULL
 );
+ALTER TABLE attendees ADD COLUMN IF NOT EXISTS company TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_event_email ON attendees(event_id, email);
 CREATE TABLE IF NOT EXISTS questions (
   id TEXT PRIMARY KEY,
@@ -49,9 +51,15 @@ CREATE TABLE IF NOT EXISTS feedback (
   attendee_id TEXT NOT NULL,
   interest INTEGER,
   would_join TEXT,
+  vision TEXT,
+  challenges TEXT,
+  assumptions TEXT,
   body TEXT,
   updated_at BIGINT NOT NULL
 );
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS vision TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS challenges TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS assumptions TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS feedback_event_attendee ON feedback(event_id, attendee_id);
 `;
 

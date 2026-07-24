@@ -118,6 +118,9 @@ export default async function EventPage({
             ? {
                 interest: myFeedback.interest,
                 wouldJoin: myFeedback.wouldJoin,
+                vision: myFeedback.vision,
+                challenges: myFeedback.challenges,
+                assumptions: myFeedback.assumptions,
                 body: myFeedback.body,
               }
             : null

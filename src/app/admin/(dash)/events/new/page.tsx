@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/session";
 
 export default async function NewEventPage() {
   await requireAdmin();
+  const today = new Date().toISOString().slice(0, 10);
   return (
     <main>
       <h1 className="text-2xl font-semibold tracking-tight">New event</h1>
@@ -10,7 +11,7 @@ export default async function NewEventPage() {
         Set up the event and write the idea primer candidates will read.
       </p>
       <div className="mt-6">
-        <EventForm />
+        <EventForm defaultDate={today} />
       </div>
     </main>
   );

@@ -67,18 +67,31 @@ export default function CheckInForm({
             />
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">
-              Current role{" "}
-              <span className="font-normal text-muted">(optional)</span>
-            </span>
-            <input
-              name="role"
-              autoComplete="organization-title"
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
-              placeholder="Staff Engineer @ Acme"
-            />
-          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">
+                Role <span className="font-normal text-muted">(optional)</span>
+              </span>
+              <input
+                name="role"
+                autoComplete="organization-title"
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+                placeholder="Staff Engineer"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">
+                Company{" "}
+                <span className="font-normal text-muted">(optional)</span>
+              </span>
+              <input
+                name="company"
+                autoComplete="organization"
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+                placeholder="Acme"
+              />
+            </label>
+          </div>
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">

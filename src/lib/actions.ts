@@ -137,6 +137,7 @@ export async function checkIn(
     return { error: "Please enter your name and a valid email." };
   }
   const role = str(formData, "role") || null;
+  const company = str(formData, "company") || null;
   const linkedin = str(formData, "linkedin") || null;
 
   const db = await getDb();
@@ -154,6 +155,7 @@ export async function checkIn(
       .set({
         name,
         role: role ?? existing.role,
+        company: company ?? existing.company,
         linkedin: linkedin ?? existing.linkedin,
       })
       .where(eq(attendees.id, attendeeId));
@@ -165,6 +167,7 @@ export async function checkIn(
       name,
       email,
       role,
+      company,
       linkedin,
       checkedInAt: Date.now(),
     });
@@ -262,9 +265,19 @@ export async function submitFeedback(
   const wouldJoin = ["yes", "maybe", "no"].includes(wouldJoinRaw)
     ? wouldJoinRaw
     : null;
+  const vision = str(formData, "vision").slice(0, 4000) || null;
+  const challenges = str(formData, "challenges").slice(0, 4000) || null;
+  const assumptions = str(formData, "assumptions").slice(0, 4000) || null;
   const body = str(formData, "body").slice(0, 4000) || null;
 
-  if (interest === null && wouldJoin === null && !body) {
+  if (
+    interest === null &&
+    wouldJoin === null &&
+    !vision &&
+    !challenges &&
+    !assumptions &&
+    !body
+  ) {
     return { error: "Add a rating or some thoughts before saving." };
   }
 
@@ -277,12 +290,23 @@ export async function submitFeedback(
       attendeeId: ctx.attendee.id,
       interest,
       wouldJoin,
+      vision,
+      challenges,
+      assumptions,
       body,
       updatedAt: Date.now(),
     })
     .onConflictDoUpdate({
       target: [feedback.eventId, feedback.attendeeId],
-      set: { interest, wouldJoin, body, updatedAt: Date.now() },
+      set: {
+        interest,
+        wouldJoin,
+        vision,
+        challenges,
+        assumptions,
+        body,
+        updatedAt: Date.now(),
+      },
     });
   revalidatePath(`/e/${code}`);
   return { ok: true };

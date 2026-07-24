@@ -26,13 +26,18 @@ const mobile = await browser.newContext({
 });
 const page = await mobile.newPage();
 
-await page.goto(`${BASE}/e/DEMO42`);
+// Landing page lists live events for link-free joining
+await page.goto(BASE);
+await page.waitForSelector("text=Happening now");
+await page.click("text=EIR Dinner — Idea: AI Sales Coach");
 await page.waitForSelector("text=Check in");
+console.log("landing page live-event join OK");
 await shot(page, "1-checkin");
 
 await page.fill('input[name="name"]', "Test Candidate");
 await page.fill('input[name="email"]', "test.candidate@example.com");
-await page.fill('input[name="role"]', "Principal Engineer @ TestCo");
+await page.fill('input[name="role"]', "Principal Engineer");
+await page.fill('input[name="company"]', "TestCo");
 await page.click('button[type="submit"]');
 await page.waitForSelector("nav >> text=Your Take", { timeout: 15000 });
 console.log("check-in OK");
@@ -57,6 +62,18 @@ await page.click("text=Your Take");
 await page.waitForSelector("text=How excited are you");
 await page.click('label:has(input[name="interest"][value="5"])');
 await page.click('label:has(input[name="wouldJoin"][value="yes"])');
+await page.fill(
+  'textarea[name="vision"]',
+  "Become the default coaching layer for every revenue team.",
+);
+await page.fill(
+  'textarea[name="challenges"]',
+  "Latency and rep trust in live suggestions.",
+);
+await page.fill(
+  'textarea[name="assumptions"]',
+  "That managers will act on the dashboard weekly.",
+);
 await page.fill(
   'textarea[name="body"]',
   "Really compelling. I would want to derisk real-time latency in week 1.",
@@ -88,6 +105,8 @@ const body = await admin.textContent("body");
 if (!body.includes("test.candidate@example.com")) fail("test attendee missing from admin table");
 if (!body.includes("How much of the first year")) fail("test question missing from admin list");
 if (!body.includes("Really compelling")) fail("test feedback missing from admin list");
+if (!body.includes("default coaching layer")) fail("vision field missing from admin feedback");
+if (!body.includes("TestCo")) fail("company column missing from admin table");
 console.log("admin dashboard shows live data OK");
 await shot(admin, "5-admin-dashboard");
 

@@ -78,6 +78,9 @@ export default async function EventDashboard({
         id: feedback.id,
         interest: feedback.interest,
         wouldJoin: feedback.wouldJoin,
+        vision: feedback.vision,
+        challenges: feedback.challenges,
+        assumptions: feedback.assumptions,
         body: feedback.body,
         updatedAt: feedback.updatedAt,
         name: attendees.name,
@@ -396,6 +399,26 @@ export default async function EventDashboard({
                   </span>
                 )}
               </div>
+              {f.vision && (
+                <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">
+                  <span className="font-medium text-muted">Vision: </span>
+                  {f.vision}
+                </p>
+              )}
+              {f.challenges && (
+                <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">
+                  <span className="font-medium text-muted">Challenges: </span>
+                  {f.challenges}
+                </p>
+              )}
+              {f.assumptions && (
+                <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">
+                  <span className="font-medium text-muted">
+                    Assumptions to validate:{" "}
+                  </span>
+                  {f.assumptions}
+                </p>
+              )}
               {f.body && (
                 <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">
                   {f.body}
@@ -421,6 +444,7 @@ export default async function EventDashboard({
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Role</th>
+                <th className="px-4 py-3 font-medium">Company</th>
                 <th className="px-4 py-3 font-medium">LinkedIn</th>
                 <th className="px-4 py-3 font-medium">Checked in</th>
                 <th className="px-4 py-3 text-right font-medium">Excitement</th>
@@ -430,7 +454,7 @@ export default async function EventDashboard({
             <tbody>
               {attendeeRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
                     No one has checked in yet — share the QR code above.
                   </td>
                 </tr>
@@ -445,6 +469,7 @@ export default async function EventDashboard({
                     <td className="px-4 py-3 font-medium">{a.name}</td>
                     <td className="px-4 py-3 text-muted">{a.email}</td>
                     <td className="px-4 py-3 text-muted">{a.role ?? "—"}</td>
+                    <td className="px-4 py-3 text-muted">{a.company ?? "—"}</td>
                     <td className="px-4 py-3">
                       {a.linkedin ? (
                         <a

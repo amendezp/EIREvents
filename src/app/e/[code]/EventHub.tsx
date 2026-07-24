@@ -22,6 +22,9 @@ type QuestionItem = {
 type FeedbackData = {
   interest: number | null;
   wouldJoin: string | null;
+  vision: string | null;
+  challenges: string | null;
+  assumptions: string | null;
   body: string | null;
 };
 
@@ -300,11 +303,53 @@ function ShareTab({
 
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">
-          Thoughts, feedback, ideas
+          What should the vision of this company be?
+        </span>
+        <textarea
+          name="vision"
+          rows={3}
+          maxLength={4000}
+          defaultValue={myFeedback?.vision ?? ""}
+          placeholder="The 10-year ambition if this works…"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">
+          What will be the main challenges?
+        </span>
+        <textarea
+          name="challenges"
+          rows={3}
+          maxLength={4000}
+          defaultValue={myFeedback?.challenges ?? ""}
+          placeholder="Technical, market, or go-to-market hurdles…"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">
+          Which assumptions or hypotheses need to be validated?
+        </span>
+        <textarea
+          name="assumptions"
+          rows={3}
+          maxLength={4000}
+          defaultValue={myFeedback?.assumptions ?? ""}
+          placeholder="The riskiest bets to test first…"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">
+          Anything else — thoughts, feedback, ideas
         </span>
         <textarea
           name="body"
-          rows={5}
+          rows={4}
           maxLength={4000}
           defaultValue={myFeedback?.body ?? ""}
           placeholder="What excites you? What concerns you? How would you approach building it?"
